@@ -8,7 +8,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.arthur.editor"
+        applicationId 'com.arthur.editor'
         minSdk 21
         targetSdk 34
         versionCode 1
@@ -20,6 +20,18 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.0'
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 }
 
@@ -33,4 +45,8 @@ dependencies {
     implementation 'androidx.compose.material3:material3:1.1.0'
 
     implementation 'com.github.Rosemoe.sora-editor:editor:0.20.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-java:0.20.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-kotlin:0.20.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-python:0.20.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-cpp:0.20.0'
 }
