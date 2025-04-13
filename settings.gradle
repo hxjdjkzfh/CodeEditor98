@@ -1,8 +1,1 @@
-pluginManagement {
-    repositories {
-        google()
-        gradlePluginPortal()
-        mavenCentral()
-    }
-}
-include ':app'
+pluginManagement {\n    repositories {\n        google()\n        mavenCentral()\n        gradlePluginPortal()\n    }\n}\n\nrootProject.name = "CodeEditor98"\ninclude(":app")
