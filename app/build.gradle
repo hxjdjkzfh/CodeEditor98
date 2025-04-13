@@ -33,6 +33,17 @@ android {
 }
 
 dependencies {
+    implementation 'io.github.Rosemoe.sora-editor:editor:0.20.0'
+
+    implementation 'io.github.Rosemoe.sora-editor:language-textmate:0.20.0'
+
+    implementation 'io.github.Rosemoe.sora-editor:language-java:0.20.0'
+
+    implementation 'io.github.Rosemoe.sora-editor:language-kotlin:0.20.0'
+
+    implementation 'io.github.Rosemoe.sora-editor:language-python:0.20.0'
+
+    implementation 'io.github.Rosemoe.sora-editor:language-cpp:0.20.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.activity:activity-compose:1.8.0'
