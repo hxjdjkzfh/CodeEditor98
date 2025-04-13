@@ -21,18 +21,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
-    buildFeatures {
-        compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion '1.5.0'
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
 }
 
 dependencies {
@@ -43,10 +31,9 @@ dependencies {
     implementation 'androidx.compose.ui:ui:1.5.0'
     implementation 'androidx.compose.ui:ui-tooling-preview:1.5.0'
     implementation 'androidx.compose.material3:material3:1.1.0'
-
-    implementation 'com.github.Rosemoe.sora-editor:editor:0.20.0'
-    implementation 'com.github.Rosemoe.sora-editor:language-java:0.20.0'
-    implementation 'com.github.Rosemoe.sora-editor:language-kotlin:0.20.0'
-    implementation 'com.github.Rosemoe.sora-editor:language-python:0.20.0'
-    implementation 'com.github.Rosemoe.sora-editor:language-cpp:0.20.0'
+    implementation 'com.github.Rosemoe.sora-editor:editor:0.21.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-java:0.21.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-kotlin:0.21.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-python:0.21.0'
+    implementation 'com.github.Rosemoe.sora-editor:language-cpp:0.21.0'
 }
