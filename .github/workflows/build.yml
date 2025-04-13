@@ -23,16 +23,8 @@ jobs:
     - name: Build APK
       run: ./gradlew assembleDebug
 
-    - name: Upload to GitHub Release
-      id: upload_release
-      uses: ncipollo/release-action@v1
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
       with:
-        tag: latest
-        name: Latest Build
-        artifacts: app/build/outputs/apk/debug/app-debug.apk
-        allowUpdates: true
-        replacesArtifacts: true
-        token: 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
-
-    - name: Print APK download link
-      run: echo "Download APK: https://github.com/${{ github.repository }}/releases/latest/download/app-debug.apk"
+        name: CodeEditor98-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
