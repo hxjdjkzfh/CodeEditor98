@@ -33,15 +33,10 @@ android {
 }
 
 dependencies {
-    implementation 'com.github.Rosemoe.sora-editor:editor:v0.20.0
 
-    implementation 'com.github.Rosemoe.sora-editor:editor:v0.20.0
 
-    implementation 'com.github.Rosemoe.sora-editor:editor:v0.20.0
 
-    implementation 'com.github.Rosemoe.sora-editor:editor:v0.20.0
 
-    implementation 'com.github.Rosemoe.sora-editor:editor:v0.20.0
 
 
 
@@ -63,3 +58,4 @@ dependencies {
     // Sora Editor (основной редактор и язык Java)
 }
 
+    implementation 'com.github.Rosemoe.sora-editor:editor:v0.20.0'
