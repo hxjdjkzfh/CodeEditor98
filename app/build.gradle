@@ -34,5 +34,9 @@ dependencies {
     implementation 'androidx.compose.ui:ui:1.5.3'
     implementation 'androidx.compose.material:material:1.5.3'
     implementation 'androidx.compose.ui:ui-tooling-preview:1.5.3'
-    implementation 'com.github.rosemoe:sora-editor:0.20.0'
+
+    // Sora Editor (основной редактор и язык Java)
+    implementation("io.github.Rosemoe.sora-editor:editor:0.20.0")
+    implementation("io.github.Rosemoe.sora-editor:language-java:0.20.0")
 }
+
