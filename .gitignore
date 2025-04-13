@@ -1,1 +1,8 @@
-gradle-8.7-bin.zip
+.idea/
+.gradle/
+local.properties
+*.iml
+app/libs/editor-release.aar
+build/
+app/build/
+

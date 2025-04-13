@@ -1,5 +1,0 @@
-<resources>
-    <style name="Theme.App" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Используем стандартную тему без ActionBar -->
-    </style>
-</resources>
