@@ -23,8 +23,6 @@ jobs:
     - name: Build APK
       run: ./gradlew assembleDebug
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: CodeEditor98-debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+    - name: Send APK to Telegram
+      run: |
+        curl -F document=@app/build/outputs/apk/debug/app-debug.apk              -F chat_id=6817339254              -F caption="CodeEditor98 APK build from GitHub"              https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendDocument
