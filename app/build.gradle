@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.github.Rosemoe.sora-editor:editor:v0.20.0'
 
 
 
