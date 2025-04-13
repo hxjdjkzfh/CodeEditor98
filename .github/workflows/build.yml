@@ -31,4 +31,4 @@ jobs:
         artifacts: app/build/outputs/apk/debug/app-debug.apk
         allowUpdates: true
         replacesArtifacts: true
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: GH_PERSONAL_ACCESS_TOKEN_HERE
