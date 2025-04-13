@@ -33,16 +33,23 @@ android {
 }
 
 dependencies {
-    implementation 'io.github.Rosemoe.sora-editor:editor:0.20.0'
+    implementation 'io.github.rosemoe.sora-editor:editor:0.21.0'
 
-    implementation 'io.github.Rosemoe.sora-editor:language-textmate:0.20.0'
+    implementation 'io.github.rosemoe.sora-editor:language-java:0.21.0'
 
-    implementation 'io.github.Rosemoe.sora-editor:language-java:0.20.0'
-    implementation 'io.github.Rosemoe.sora-editor:editor:0.20.0'
+    implementation 'io.github.rosemoe.sora-editor:language-kotlin:0.21.0'
 
-    implementation 'io.github.Rosemoe.sora-editor:language-textmate:0.20.0'
+    implementation 'io.github.rosemoe.sora-editor:language-python:0.21.0'
 
-    implementation 'io.github.Rosemoe.sora-editor:language-java:0.20.0'
+    implementation 'io.github.rosemoe.sora-editor:language-cpp:0.21.0'
+
+
+
+
+
+
+
+
 
 
 
@@ -54,7 +61,5 @@ dependencies {
     implementation 'androidx.compose.ui:ui-tooling-preview:1.5.3'
 
     // Sora Editor (основной редактор и язык Java)
-    implementation("io.github.Rosemoe.sora-editor:editor:0.20.0")
-    implementation("io.github.Rosemoe.sora-editor:language-java:0.20.0")
 }
 
