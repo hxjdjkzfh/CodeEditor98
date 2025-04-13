@@ -1,7 +1,6 @@
 package com.arthur.editor.ui
 
 import android.content.Context
-import android.widget.FrameLayout
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -31,7 +30,7 @@ fun CodeEditorView(
                     "Kotlin" -> KotlinLanguage()
                     "Python" -> PythonLanguage()
                     "C++" -> CppLanguage()
-                    else -> JavaScriptLanguage()
+                    else -> PlainTextLanguage()
                 }
             )
         }
