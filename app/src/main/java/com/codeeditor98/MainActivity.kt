@@ -30,6 +30,11 @@
                                 })
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Button(onClick = { openLauncher.launch(arrayOf("*/*")) }) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(onClick = { editorView?.undo() }) { Text("Undo") }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(onClick = { editorView?.redo() }) { Text("Redo") }
+
                                     Text("Open")
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
