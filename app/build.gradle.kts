@@ -38,19 +38,26 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"
     }
+}
 
-    sourceSets["main"].jniLibs.srcDirs("libs")
+repositories {
+    google()
+    mavenCentral()
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
+    implementation(platform("io.github.rosemoe.sora-editor:bom:0.23.2"))
+    implementation("io.github.rosemoe.sora-editor:editor")
+    implementation("io.github.rosemoe.sora-editor:language-java")
+    implementation("io.github.rosemoe.sora-editor:language-kotlin")
+    implementation("io.github.rosemoe.sora-editor:language-textmate")
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-
-    // Compose
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation("androidx.compose.ui:ui:1.5.3")
     implementation("androidx.compose.ui:ui-tooling-preview:1.5.3")
     implementation("androidx.compose.material3:material3:1.2.0")
     implementation("androidx.compose.foundation:foundation:1.5.3")
+    implementation("androidx.compose.ui:ui-viewinterop:1.5.3")
 }
