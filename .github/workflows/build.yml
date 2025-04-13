@@ -24,6 +24,7 @@ jobs:
       run: ./gradlew assembleDebug
 
     - name: Upload to GitHub Release
+      id: upload_release
       uses: ncipollo/release-action@v1
       with:
         tag: latest
@@ -32,3 +33,6 @@ jobs:
         allowUpdates: true
         replacesArtifacts: true
         token: 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
+
+    - name: Print APK download link
+      run: echo "Download APK: https://github.com/${{ github.repository }}/releases/latest/download/app-debug.apk"
