@@ -54,7 +54,7 @@ fun CodeEditorView(
                     }
                 )
 
-                setText("// Use menu to open or save files...")
+    AndroidView(factory = { CodeEditor(it).apply { setText("fun main() = println(\"Hello\")") } })
             }
             addView(editor)
         }
