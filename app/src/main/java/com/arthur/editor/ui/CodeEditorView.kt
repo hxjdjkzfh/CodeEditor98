@@ -7,7 +7,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
-import io.github.rosemoe.sora.langs.textmate.languages.JavaLanguage
+import io.github.rosemoe.sora.langs.textmate.language.JavaLanguage
 
 @Composable
 fun CodeEditorView(
