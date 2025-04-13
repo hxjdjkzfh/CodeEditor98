@@ -29,5 +29,5 @@ dependencies {
     implementation 'androidx.compose.ui:ui:1.5.0'
     implementation 'androidx.compose.ui:ui-tooling-preview:1.5.0'
     implementation 'androidx.compose.material3:material3:1.1.0'
+    implementation 'com.github.Rosemoe.SoraEditor:editor:0.20.0'
 }
-    implementation 'com.github.Rosemoe.SoraEditor:editor:0.20.0'\n    implementation 'com.github.Rosemoe.SoraEditor:language-java:0.20.0'\n    implementation 'com.github.Rosemoe.SoraEditor:language-kotlin:0.20.0'\n    implementation 'com.github.Rosemoe.SoraEditor:language-python:0.20.0'\n    implementation 'com.github.Rosemoe.SoraEditor:language-cpp:0.20.0'
