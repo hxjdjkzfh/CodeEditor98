@@ -5,6 +5,7 @@ plugins {
 
 android {
     compileSdk = 34
+    namespace = "com.codeeditor98"
 
     defaultConfig {
         applicationId = "com.codeeditor98"
