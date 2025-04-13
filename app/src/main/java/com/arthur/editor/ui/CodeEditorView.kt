@@ -1,3 +1,8 @@
+import io.github.rosemoe.sora.widget.CodeEditor
+
+import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
+
+import io.github.rosemoe.sora.langs.textmate.languages.JavaLanguage
 package com.arthur.editor.ui
 
 import android.content.Context
