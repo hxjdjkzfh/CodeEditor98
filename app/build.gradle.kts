@@ -46,11 +46,10 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("io.github.rosemoe.sora-editor:bom:0.23.2"))
-    implementation("io.github.rosemoe.sora-editor:editor")
-    implementation("io.github.rosemoe.sora-editor:language-java")
-    implementation("io.github.rosemoe.sora-editor:language-kotlin")
-    implementation("io.github.rosemoe.sora-editor:language-textmate")
+    implementation("io.github.rosemoe.sora-editor:editor:0.21.0")
+    implementation("io.github.rosemoe.sora-editor:language-java:0.21.0")
+    implementation("io.github.rosemoe.sora-editor:language-kotlin:0.21.0")
+    implementation("io.github.rosemoe.sora-editor:language-textmate:0.21.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -59,5 +58,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.5.3")
     implementation("androidx.compose.material3:material3:1.2.0")
     implementation("androidx.compose.foundation:foundation:1.5.3")
+    implementation("androidx.compose.ui:ui-viewbinding:1.5.3")
     implementation("androidx.compose.ui:ui-viewinterop:1.5.3")
 }
