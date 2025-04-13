@@ -7,27 +7,26 @@ on:
 
 jobs:
   build:
-    name: Build Debug APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Give permissions to gradlew
+      - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle
+      - name: Build APK
         run: ./gradlew assembleDebug
 
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v2
-        with:
-          name: CodeEditor.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Encode APK to base64 and print to log
+        run: |
+          echo "::group::BASE64 APK OUTPUT"
+          base64 app/build/outputs/apk/debug/app-debug.apk
+          echo "::endgroup::"
