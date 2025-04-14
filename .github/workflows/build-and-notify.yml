@@ -1,13 +1,35 @@
-name: Build and Notify
+name: Build and Notify via Telegram
 
 on:
   workflow_dispatch:
   push:
-    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Example
-        run: echo "GitHub Actions works!"
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build APK and send to Telegram
+        run: |
+          ./gradlew assembleDebug --stacktrace --info > build.log 2>&1 || true
+          if grep -q "BUILD SUCCESSFUL" build.log; then
+            curl -s -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+                 -F document=@"app/build/outputs/apk/debug/app-debug.apk" \
+                 "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument"
+          else
+            tail -n 100 build.log > err.txt
+            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+                 -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+                 --data-urlencode "text=❌ Build failed for \`${{ github.repository }}\`%0ACommit: \`${{ github.sha }}\`%0A$(tail -n 30 build.log | sed 's/$/%0A/' | head -c 3500)"
+          fi
