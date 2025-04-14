@@ -1,4 +1,4 @@
-name: Build APK and Notify
+name: Build APK and Notify Telegram
 
 on:
   push:
@@ -9,38 +9,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up JDK
+    - name: Setup JDK
       uses: actions/setup-java@v3
       with:
-        distribution: 'temurin'
+        distribution: temurin
         java-version: 17
 
-    - name: Set up Android SDK
+    - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
+    - name: Build APK and log output
+      run: |
+        ./gradlew assembleDebug > build.log 2>&1 || echo "::set-output name=failed::true"
 
-    - name: Build APK
-      run: ./gradlew assembleDebug
-
-    - name: Upload APK to Telegram
+    - name: Send APK to Telegram
       if: success()
       run: |
         curl -s -F document=@app/build/outputs/apk/debug/app-debug.apk \
              -F chat_id=6817339254 \
-             -F caption="✅ CodeEditor98 собран успешно!" \
+             -F caption="✅ CodeEditor98: сборка успешна" \
              https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendDocument
 
-    - name: Send failure to Telegram
+    - name: Send failure log to Telegram
       if: failure()
       run: |
-        tail -n 1000 $GITHUB_WORKSPACE/app/build.gradle.kts > error.log || true
-        tail -n 100 $GITHUB_WORKSPACE/error.log | grep -E "FAILURE|Exception|error|could not|not found|failed|Error" | tail -n 15 > short.log || true
-        TEXT=$(cat short.log | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+        LOG=$(grep -A 30 -E "FAILURE|Execution failed for task|BUILD FAILED" build.log | tail -n 30 | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
         curl -s -X POST https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage \
           -d chat_id=6817339254 \
-          -d text="❌ Ошибка сборки CodeEditor98:\n$TEXT"
+          -d parse_mode=Markdown \
+          -d text="❌ *CodeEditor98: ошибка сборки*\n\`\`\`\n$LOG\n\`\`\`"
