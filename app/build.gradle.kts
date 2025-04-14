@@ -46,6 +46,8 @@ repositories {
 }
 
 dependencies {
+    implementation(files("app/libs/language-textmate.aar"))
+    implementation(files("app/libs/editor-release.aar"))
     implementation(files("libs/editor-release.aar"))
     implementation(files("libs/language-textmate.aar"))
     implementation("com.google.android.material:material:1.11.0")
@@ -62,6 +64,8 @@ dependencies {
 }
 
 dependencies {
+    implementation(files("app/libs/language-textmate.aar"))
+    implementation(files("app/libs/editor-release.aar"))
     implementation(files("libs/editor-release.aar"))
     implementation(files("libs/language-textmate.aar"))
     implementation("com.google.android.material:material:1.11.0")
