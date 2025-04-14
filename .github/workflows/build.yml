@@ -32,6 +32,32 @@ jobs:
 
       -d text="❌ CodeEditor98: Build failed in GitHub Actions. Check logs: https://github.com/hxjdjkzfh/CodeEditor98/actions"
 
+- name: Run Gradle and save output
+
+  run: |
+
+    ./gradlew assembleDebug > build.log 2>&1 || true
+
+
+
+- name: Send build error to Telegram
+
+  if: failure()
+
+  run: |
+
+    tail -n 40 build.log > short.log
+
+    curl -s -X POST https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage \
+
+      -d chat_id=6817339254 \
+
+      --data-urlencode text="❌ CodeEditor98: Build failed
+```
+$(cat short.log)
+```" \
+
+      -d parse_mode=Markdown
     - name: Build APK
       run: ./gradlew assembleDebug
 
