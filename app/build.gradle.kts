@@ -54,6 +54,8 @@ dependencies {
     implementation(files("libs/language-textmate.aar"))
     implementation(files("libs/editor-release.aar"))
     implementation(files("libs/language-textmate.aar"))
+    implementation(files("libs/editor-release.aar"))
+    implementation(files("libs/language-textmate.aar"))
     implementation(files("app/libs/language-textmate.aar"))
     implementation(files("app/libs/editor-release.aar"))
     implementation(files("libs/editor-release.aar"))
@@ -80,6 +82,8 @@ dependencies {
     implementation(files("libs/language-textmate.aar"))
     implementation(files("libs/editor-release.aar"))
     implementation(files("libs/language-textmate.aar"))
+    implementation(files("libs/editor-release.aar"))
+    implementation(files("libs/language-textmate.aar"))
     implementation(files("app/libs/language-textmate.aar"))
     implementation(files("app/libs/editor-release.aar"))
     implementation(files("libs/editor-release.aar"))
@@ -88,5 +92,3 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.1.2")
     implementation(files("libs/editor-release.aar"))
 }
-implementation(files("libs/editor-release.aar"))
-implementation(files("libs/language-textmate.aar"))
