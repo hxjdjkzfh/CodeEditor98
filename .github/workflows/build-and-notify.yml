@@ -4,6 +4,12 @@ on:
   workflow_dispatch:
   push:
 
+name: Build and Notify via Telegram
+
+on:
+  workflow_dispatch:
+  push:
+
 jobs:
   build:
     runs-on: ubuntu-latest
