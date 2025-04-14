@@ -2,7 +2,6 @@
 .gradle/
 local.properties
 *.iml
-app/libs/editor-release.aar
 build/
 app/build/
 
