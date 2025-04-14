@@ -1,50 +1,13 @@
-on:
-  workflow_dispatch:
-  workflow_dispatch:
-  workflow_dispatch:
-on:
-  workflow_dispatch:
-  workflow_dispatch:
 name: Build and Notify
 
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 17
-
-      - name: Build APK
-        id: build
-        run: |
-          ./gradlew assembleDebug || echo "BUILD_FAILED=true" >> $GITHUB_ENV
-
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: CodeEditor98-debug.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Notify Telegram
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            ${{ github.repository }} обновлён.
-            Commit: ${{ github.sha }}
-            Статус: ${{ env.BUILD_FAILED == 'true' && '❌ Сборка не удалась' || '✅ Сборка успешна' }}
-            Логи: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: Example
+        run: echo "GitHub Actions works!"
