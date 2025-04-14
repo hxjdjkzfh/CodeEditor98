@@ -42,3 +42,17 @@ jobs:
                  -d text="❌ Build failed for *${{ github.repository }}* on commit *${{ github.sha }}*%0A%0A\`\`\`${ERROR_LOG:0:3000}\`\`\`" \
                  -d parse_mode=Markdown
           fi
+
+- name: Build APK and notify Telegram
+  run: |
+    ./gradlew assembleDebug --stacktrace --info > build.log 2>&1 || true
+    if grep -q "BUILD SUCCESSFUL" build.log; then
+      curl -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+           -F document=@app/build/outputs/apk/debug/app-debug.apk \
+           "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument"
+    else
+      tail -n 100 build.log > err.txt
+      curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+           -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+           --data-urlencode "text=❌ Build failed for \`${{ github.repository }}\`%0ACommit: \`${{ github.sha }}\`%0A$(tail -n 30 build.log | sed 's/$/%0A/' | head -c 3500)"
+    fi
