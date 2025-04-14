@@ -1,1 +1,2 @@
-<?xml version="1.0" encoding="UTF-8"?><Error><Code>NoSuchBucket</Code><Message></Message><BucketName>codeeditor98</BucketName><RequestId>tx000006fc73eed44cd740d-0067fc8067-2b910262-nyc3d</RequestId><HostId>2b910262-nyc3d-nyc3-zg04</HostId></Error>
+<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>AccessDenied</Code><Message>Request has expired</Message><X-Amz-Expires>300</X-Amz-Expires><Expires>2025-04-13T20:05:00Z</Expires><ServerTime>2025-04-14T03:27:10Z</ServerTime><RequestId>W88HWFDP8R91QDVJ</RequestId><HostId>1Oq3v6quDGIWISBftoA8hS4DgFfSDN5iNjQzPNHHrrvklz0iW7rN2G/2oz5cAmd86Qp/WLP0NPYouI6LxvrqETkL2p6W5iMJh19aesux6Ms=</HostId></Error>
