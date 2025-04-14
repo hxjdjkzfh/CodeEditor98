@@ -2,30 +2,43 @@ name: Build and Notify via Telegram
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout project
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: 17
 
-      - name: Build APK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+        continue-on-error: true
+
+      - name: Check build result and notify Telegram
+        if: always()
         run: |
-          ./gradlew assembleDebug --stacktrace --info > build.log 2>&1 || true
-          if grep -q "BUILD SUCCESSFUL" build.log; then
-            curl -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+            curl -s -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                  -F document=@app/build/outputs/apk/debug/app-debug.apk \
-                 "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument"
+                 https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
           else
-            tail -n 80 build.log > err.txt
-            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-                 -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-                 --data-urlencode "text=❌ Build failed for \`${{ github.repository }}\`%0ACommit: ${{ github.sha }}%0A\n$(tail -n 30 build.log | sed 's/$/%0A/' | head -c 3500)"
+            ERROR_LOG=$(tail -n 1000 $GITHUB_WORKSPACE/build.gradle.kts || echo "Build failed. Check logs.")
+            curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+                 -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+                 -d text="❌ Build failed for *${{ github.repository }}* on commit *${{ github.sha }}*%0A%0A\`\`\`${ERROR_LOG:0:3000}\`\`\`" \
+                 -d parse_mode=Markdown
           fi
