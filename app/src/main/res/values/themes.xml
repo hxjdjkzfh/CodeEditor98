@@ -1,1 +1,1 @@
-<resources><style name="Theme.CodeEditor98" parent="Theme.Material3.DayNight.NoActionBar"/></resources>
+<resources><style name="Theme.CodeEditor98" parent="Theme.MaterialComponents.DayNight.NoActionBar"/></resources>

@@ -46,6 +46,7 @@ repositories {
 }
 
 dependencies {
+    implementation("androidx.compose.material3:material3:1.1.2")
     implementation(files("libs/editor-release.aar"))
 
     implementation("androidx.core:core-ktx:1.12.0")
@@ -58,5 +59,6 @@ dependencies {
 }
 
 dependencies {
+    implementation("androidx.compose.material3:material3:1.1.2")
     implementation(files("libs/editor-release.aar"))
 }
