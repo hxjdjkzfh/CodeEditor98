@@ -46,9 +46,8 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("io.github.rosemoe.sora-editor:bom:0.23.4"))
-    implementation("io.github.rosemoe.sora-editor:editor")
-    implementation("io.github.rosemoe.sora-editor:language-textmate")
+    implementation("io.github.rosemoe.sora-editor:editor:0.21.0")
+    implementation("io.github.rosemoe.sora-editor:language-textmate:0.21.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
