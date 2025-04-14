@@ -43,11 +43,12 @@ android {
 repositories {
     google()
     mavenCentral()
-    maven(url = "https://jitpack.io")
 }
 
 dependencies {
-    implementation("com.github.Rosemoe:SoraEditor:0.21.0")
+    implementation(platform("io.github.rosemoe.sora-editor:bom:0.23.4"))
+    implementation("io.github.rosemoe.sora-editor:editor")
+    implementation("io.github.rosemoe.sora-editor:language-textmate")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
