@@ -46,6 +46,8 @@ repositories {
 }
 
 dependencies {
+    implementation(files("libs/editor-release.aar"))
+    implementation(files("libs/language-textmate.aar"))
     implementation(files("app/libs/language-textmate.aar"))
     implementation(files("app/libs/editor-release.aar"))
     implementation(files("libs/editor-release.aar"))
@@ -64,6 +66,8 @@ dependencies {
 }
 
 dependencies {
+    implementation(files("libs/editor-release.aar"))
+    implementation(files("libs/language-textmate.aar"))
     implementation(files("app/libs/language-textmate.aar"))
     implementation(files("app/libs/editor-release.aar"))
     implementation(files("libs/editor-release.aar"))
