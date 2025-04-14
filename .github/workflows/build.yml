@@ -1,4 +1,4 @@
-name: Android CI
+name: Build APK and Notify
 
 on:
   push:
@@ -9,69 +9,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
+    - name: Set up JDK
+      uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: 17
 
-    - name: Give gradlew permission
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
 
-- name: Notify via Telegram on Failure
-
-  if: failure()
-
-  run: |
-
-    curl -s -X POST https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage \
-
-      -d chat_id=6817339254 \
-
-      -d text="❌ CodeEditor98: Build failed in GitHub Actions. Check logs: https://github.com/hxjdjkzfh/CodeEditor98/actions"
-
-- name: Run Gradle and save output
-
-  run: |
-
-    ./gradlew assembleDebug > build.log 2>&1 || true
-
-
-
-- name: Send build error to Telegram
-
-  if: failure()
-
-  run: |
-
-    tail -n 40 build.log > short.log
-
-    curl -s -X POST https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage \
-
-      -d chat_id=6817339254 \
-
-      --data-urlencode text="❌ CodeEditor98: Build failed
-```
-$(cat short.log)
-```" \
-
-      -d parse_mode=Markdown
     - name: Build APK
       run: ./gradlew assembleDebug
-      - name: Send failure message to Telegram
 
-        if: failure()
-
-        run: |
-
-          curl -s -X POST https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage \
-
-            -d chat_id=6817339254 \
-
-            -d text="❌ CodeEditor98 сборка не удалась!\n\nJob: ${{ github.job }}\nStep: ${{ github.step }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-    - name: Send APK to Telegram
+    - name: Upload APK to Telegram
+      if: success()
       run: |
-        curl -F document=@app/build/outputs/apk/debug/app-debug.apk              -F chat_id=6817339254              -F caption="CodeEditor98: новая сборка .apk с GitHub"              https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendDocument
+        curl -s -F document=@app/build/outputs/apk/debug/app-debug.apk \
+             -F chat_id=6817339254 \
+             -F caption="✅ CodeEditor98 собран успешно!" \
+             https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendDocument
+
+    - name: Send failure to Telegram
+      if: failure()
+      run: |
+        tail -n 1000 $GITHUB_WORKSPACE/app/build.gradle.kts > error.log || true
+        tail -n 100 $GITHUB_WORKSPACE/error.log | grep -E "FAILURE|Exception|error|could not|not found|failed|Error" | tail -n 15 > short.log || true
+        TEXT=$(cat short.log | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+        curl -s -X POST https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage \
+          -d chat_id=6817339254 \
+          -d text="❌ Ошибка сборки CodeEditor98:\n$TEXT"
