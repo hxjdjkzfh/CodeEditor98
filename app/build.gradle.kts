@@ -38,20 +38,19 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"
     }
-
-    sourceSets["main"].jniLibs.srcDirs("libs")
 }
 
 repositories {
     google()
     mavenCentral()
-    flatDir {
-        dirs("libs")
-    }
 }
 
 dependencies {
-    implementation(files("libs/editor-release.aar"))
+    implementation(platform("io.github.rosemoe.sora-editor:bom:0.23.2"))
+    implementation("io.github.rosemoe.sora-editor:editor")
+    implementation("io.github.rosemoe.sora-editor:language-java")
+    implementation("io.github.rosemoe.sora-editor:language-kotlin")
+    implementation("io.github.rosemoe.sora-editor:language-textmate")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
