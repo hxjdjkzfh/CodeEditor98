@@ -1,43 +1,52 @@
-name: Build APK and Notify Telegram
+name: Build and Notify
 
 on:
   push:
-    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
-    - name: Build APK and log output
-      run: |
-        ./gradlew assembleDebug > build.log 2>&1 || echo "::set-output name=failed::true"
+      - name: Build APK
+        run: ./gradlew assembleDebug | tee build.log
 
-    - name: Send APK to Telegram
-      if: success()
-      run: |
-        curl -s -F document=@app/build/outputs/apk/debug/app-debug.apk \
-             -F chat_id=6817339254 \
-             -F caption="✅ CodeEditor98: сборка успешна" \
-             https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendDocument
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Send failure log to Telegram
-      if: failure()
-      run: |
-        LOG=$(grep -A 30 -E "FAILURE|Execution failed for task|BUILD FAILED" build.log | tail -n 30 | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
-        curl -s -X POST https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage \
-          -d chat_id=6817339254 \
-          -d parse_mode=Markdown \
-          -d text="❌ *CodeEditor98: ошибка сборки*\n\`\`\`\n$LOG\n\`\`\`"
+      - name: Send APK to Telegram
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          document: app/build/outputs/apk/debug/app-debug.apk
+          message: "✅ New build of CodeEditor98"
+
+      - name: Send build log to Telegram on failure
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          document: build.log
+          message: |
+            ❌ Build failed for CodeEditor98
+            Commit: ${{ github.event.head_commit.message }}
