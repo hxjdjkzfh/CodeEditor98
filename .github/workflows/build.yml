@@ -23,19 +23,23 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Build APK and handle Telegram
+      - name: Build APK and notify Telegram
         run: |
           chmod +x ./gradlew
           ./gradlew assembleDebug > build.log 2>&1 || true
 
+          echo "[DEBUG] Checking for APK at app/build/outputs/apk/debug/app-debug.apk"
           if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+            echo "[DEBUG] APK found, sending to Telegram..."
             curl -F document=@app/build/outputs/apk/debug/app-debug.apk \
                  -F chat_id="$TELEGRAM_CHAT_ID" \
                  -F caption="✅ CodeEditor98 build succeeded" \
                  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
           else
+            echo "[DEBUG] APK not found, sending filtered error log..."
             tail -n 50 build.log | grep -E 'FAILED|FAILURE|error|Exception|Could not' | tail -n 15 > short_error.txt || echo "❌ Build failed but no filtered error" > short_error.txt
             curl -F document=@short_error.txt \
                  -F chat_id="$TELEGRAM_CHAT_ID" \
                  -F caption="❌ CodeEditor98 build failed (details below)" \
                  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
+          fi
