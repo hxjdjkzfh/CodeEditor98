@@ -24,18 +24,16 @@ class SettingsDialog(
         fontSizeInput.setText(prefs.getInt("fontSize", 16).toString())
         tailCheckbox.isChecked = prefs.getBoolean("showTail", true)
 
-        val position = prefs.getString("panelSide", "bottom")
-        when (position) {
-            "bottom" -> panelPositionGroup.check(R.id.radioBottom)
+        when (prefs.getString("panelSide", "bottom")) {
             "left" -> panelPositionGroup.check(R.id.radioLeft)
             "right" -> panelPositionGroup.check(R.id.radioRight)
+            else -> panelPositionGroup.check(R.id.radioBottom)
         }
 
         val languages = listOf("text", "java", "kotlin", "python", "cpp", "js")
         val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, languages)
         langSpinner.adapter = adapter
-        val savedLang = prefs.getString("language", "text")
-        langSpinner.setSelection(languages.indexOf(savedLang))
+        langSpinner.setSelection(languages.indexOf(prefs.getString("language", "text")))
 
         AlertDialog.Builder(context)
             .setTitle("Settings")
