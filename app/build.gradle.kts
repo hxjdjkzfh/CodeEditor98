@@ -45,12 +45,13 @@ repositories {
     mavenCentral()
 }
 
+
+
 dependencies {
     implementation(files("app/libs/editor-release.aar"))
     implementation(files("app/libs/language-textmate.aar"))
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.compose.material3:material3:1.1.2")
-
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity-compose:1.8.0")
@@ -60,9 +61,3 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.5.3")
 }
 
-dependencies {
-    implementation(files("app/libs/editor-release.aar"))
-    implementation(files("app/libs/language-textmate.aar"))
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.compose.material3:material3:1.1.2")
-}
