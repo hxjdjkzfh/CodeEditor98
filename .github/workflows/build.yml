@@ -23,7 +23,7 @@ jobs:
       - name: Build APK
         run: ./gradlew assembleDebug | tee build.log
 
-      - name: Upload build artifacts
+      - name: Upload APK if build succeeds
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -42,9 +42,9 @@ jobs:
       - name: Extract Kotlin errors
         if: failure()
         run: |
-          grep '^e: ' build.log > err.txt || echo "No Kotlin errors found" > err.txt
+          grep -iE 'Unresolved reference|Compilation error|e: ' build.log > err.txt || echo "No matching Kotlin errors found" > err.txt
 
-      - name: Send error log to Telegram
+      - name: Send errors to Telegram
         if: failure()
         uses: appleboy/telegram-action@master
         with:
@@ -52,5 +52,5 @@ jobs:
           token: ${{ secrets.TELEGRAM_TOKEN }}
           document: err.txt
           message: |
-            ❌ Build failed (CodeEditor98)
+            ❌ Kotlin compile failed (CodeEditor98)
             Commit: ${{ github.event.head_commit.message }}
