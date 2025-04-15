@@ -1,4 +1,4 @@
-name: Build CodeEditor98 with Telegram Alerts (Fixed)
+name: Build CodeEditor98 with Telegram Alerts
 
 on:
   push:
@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     steps:
       - name: Checkout repo
@@ -29,13 +32,13 @@ jobs:
         if: success()
         run: |
           curl -F document=@app/build/outputs/apk/debug/app-debug.apk \
-               -F chat_id="6817339254" \
+               -F chat_id="$TELEGRAM_CHAT_ID" \
                -F caption="✅ CodeEditor98 build succeeded" \
-               "https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendDocument"
+               "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
 
       - name: Send error to Telegram
         if: failure()
         run: |
-          curl -F chat_id="6817339254" \
+          curl -F chat_id="$TELEGRAM_CHAT_ID" \
                -F text="❌ CodeEditor98 build failed during GitHub Actions" \
-               "https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage"
+               "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage"
