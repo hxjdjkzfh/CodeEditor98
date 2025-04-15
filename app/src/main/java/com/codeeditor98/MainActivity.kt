@@ -3,6 +3,7 @@ package com.codeeditor98
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
+import android.widget.LinearLayout   // Добавлен импорт LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                 fileTabs[index].path = it.toString()
                 fileTabs[index].title = it.lastPathSegment ?: "saved.txt"
                 adapter.notifyItemChanged(index)
-                showToast("Saved as ${fileTabs[index].title}")
+                showToast("Saved as \${fileTabs[index].title}")
             } else showToast("Save As failed")
         }
     }
@@ -78,9 +79,7 @@ class MainActivity : AppCompatActivity() {
             R.id.menu_settings -> {
                 SettingsDialog(this) { applyEditorSettings() }.show(); true
             }
-            R.id.menu_about -> {
-                showToast("CodeEditor98 by Артур"); true
-            }
+            R.id.menu_about -> { showToast("CodeEditor98 by Артур"); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -89,19 +88,16 @@ class MainActivity : AppCompatActivity() {
         if (event.action == KeyEvent.ACTION_DOWN) {
             val ctrl = event.isCtrlPressed
             val shift = event.isShiftPressed
-            val key = event.keyCode
-
             when {
-                ctrl && key == KeyEvent.KEYCODE_S -> {
-                    if (shift) saveAsLauncher.launch("untitled.txt")
-                    else handleSave()
+                ctrl && event.keyCode == KeyEvent.KEYCODE_S -> {
+                    if (shift) saveAsLauncher.launch("untitled.txt") else handleSave()
                     return true
                 }
-                ctrl && key == KeyEvent.KEYCODE_O -> {
+                ctrl && event.keyCode == KeyEvent.KEYCODE_O -> {
                     openFileLauncher.launch(arrayOf("*/*"))
                     return true
                 }
-                ctrl && key == KeyEvent.KEYCODE_N -> {
+                ctrl && event.keyCode == KeyEvent.KEYCODE_N -> {
                     addNewTab()
                     return true
                 }
@@ -114,8 +110,7 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("settings", MODE_PRIVATE)
         val fontSize = prefs.getInt("fontSize", 16)
         adapter.setFontSize(fontSize)
-
-        findViewById<View>(R.id.tailHandle).isVisible = prefs.getBoolean("showTail", true)
+        findViewById<View>(R.id.tailHandle)?.isVisible = prefs.getBoolean("showTail", true)
         val layout = findViewById<LinearLayout>(R.id.editorLayout)
         layout.orientation = when (prefs.getString("panelSide", "bottom")) {
             "left", "right" -> LinearLayout.HORIZONTAL
@@ -135,10 +130,10 @@ class MainActivity : AppCompatActivity() {
         val tab = fileTabs[index]
         val uriStr = tab.path
         val content = adapter.getContent(index)
-
         if (uriStr != null) {
             val uri = Uri.parse(uriStr)
-            if (writeTextToUri(uri, content)) showToast("Saved ${tab.title}")
+            if (writeTextToUri(uri, content))
+                showToast("Saved \${tab.title}")
             else showToast("Save failed")
         } else {
             saveAsLauncher.launch(tab.title)
@@ -147,8 +142,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun readTextFromUri(uri: Uri): String? {
         return try {
-            contentResolver.openInputStream(uri)?.use {
-                BufferedReader(InputStreamReader(it)).readText()
+            contentResolver.openInputStream(uri)?.use { input ->
+                BufferedReader(InputStreamReader(input)).readText()
             }
         } catch (e: Exception) { null }
     }
