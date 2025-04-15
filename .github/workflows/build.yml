@@ -1,4 +1,4 @@
-name: CodeEditor98 CI with Script Error Detection
+name: CodeEditor98 CI with Kotlin Script Error Highlight
 
 on:
   push:
@@ -34,11 +34,11 @@ jobs:
                  -F caption="✅ CodeEditor98 build succeeded" \
                  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
           else
-            echo "[DEBUG] Build failed. Trying to extract error..."
-            ERROR=$(grep -iE 'Script compilation error|unexpected|unresolved|FAILURE:|> Task|Exception' build.log | tail -n 20 | sed 's/`/\\`/g')
-            TEXT="❌ *CodeEditor98 build failed*\n\`\`\`\n$ERROR\n\`\`\`"
+            echo "[DEBUG] Build failed. Extracting gradle script errors..."
+            ERRORS=$(grep -iE 'build.gradle.kts|Script compilation error|Unresolved reference|unexpected|FAILURE|> Task|Exception' build.log | tail -n 25 | sed 's/`/\\`/g')
+            MSG="❌ *CodeEditor98 build failed (Kotlin script)*\n\`\`\`\n$ERRORS\n\`\`\`"
             curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
               -d chat_id="$TELEGRAM_CHAT_ID" \
               -d parse_mode=MarkdownV2 \
-              --data-urlencode "text=$TEXT"
+              --data-urlencode "text=$MSG"
           fi
