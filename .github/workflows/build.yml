@@ -1,4 +1,4 @@
-name: Build CodeEditor98 with Telegram Error as Text
+name: CodeEditor98 CI with Telegram Reporting
 
 on:
   push:
@@ -23,23 +23,23 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Build APK and notify Telegram
+      - name: Build and notify
         run: |
           chmod +x ./gradlew
           ./gradlew assembleDebug > build.log 2>&1 || true
 
           if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
-            echo "[DEBUG] APK found, sending..."
+            echo "[DEBUG] APK found"
             curl -F document=@app/build/outputs/apk/debug/app-debug.apk \
                  -F chat_id="$TELEGRAM_CHAT_ID" \
                  -F caption="✅ CodeEditor98 build succeeded" \
                  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
           else
-            echo "[DEBUG] APK not found, sending filtered error text..."
-
-            ERROR_TEXT=$(tail -n 50 build.log | grep -E 'FAILED|FAILURE|error|Exception|Could not' | tail -n 15 | sed 's/`/\\`/g')
+            echo "[DEBUG] APK not found, extracting error..."
+            LOG=$(tail -n 150 build.log | grep -iE 'FAILED|FAILURE|error|Exception|Could not|> Task' | tail -n 20 | sed 's/`/\\`/g' | sed 's/\r//' )
+            TEXT="❌ *CodeEditor98 build failed*\n\`\`\`\n$LOG\n\`\`\`"
             curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
               -d chat_id="$TELEGRAM_CHAT_ID" \
               -d parse_mode=MarkdownV2 \
-              --data-urlencode "text=❌ *CodeEditor98 build failed*\n\`\`\`\n$ERROR_TEXT\n\`\`\`"
+              --data-urlencode "text=$TEXT"
           fi
