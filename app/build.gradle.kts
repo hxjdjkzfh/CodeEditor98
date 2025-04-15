@@ -49,7 +49,6 @@ repositories {
 
 
 dependencies {
-    implementation("com.github.Rosemoe:sora:0.20.1")
     implementation(files("libs/editor-release.aar"))
     implementation(files("libs/language-textmate.aar"))
     implementation("com.google.android.material:material:1.11.0")
