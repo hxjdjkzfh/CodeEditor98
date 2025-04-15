@@ -1,14 +1,12 @@
 package com.codeeditor98
 
-import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -19,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager2
     private lateinit var adapter: FileTabAdapter
+
     private val fileTabs = mutableListOf<FileTab>()
 
     private val openFileLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -52,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(android.R.style.Theme_DeviceDefault)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity() {
 
         adapter = FileTabAdapter(this, fileTabs)
         viewPager.adapter = adapter
+
+        applyEditorSettings()
 
         addNewTab()
 
@@ -91,12 +93,25 @@ class MainActivity : AppCompatActivity() {
                 saveAsLauncher.launch("untitled.txt")
                 true
             }
+            R.id.menu_settings -> {
+                SettingsDialog(this) {
+                    applyEditorSettings()
+                }.show()
+                true
+            }
             R.id.menu_about -> {
                 showToast("CodeEditor98 by Артур")
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun applyEditorSettings() {
+        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+        val fontSize = prefs.getInt("fontSize", 16)
+        adapter.setFontSize(fontSize)
+        // Хвостик и позиция панели можно применить здесь, если появится соответствующий UI
     }
 
     private fun addNewTab() {
