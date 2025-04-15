@@ -7,7 +7,7 @@ import android.view.*
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast  // Добавлен импорт для Toast
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
 data class FileTab(
@@ -34,9 +34,15 @@ class FileTabAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
+        // Создаем контейнер с MATCH_PARENT
         val layout = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
         }
+        // TextView для номеров строк
         val lineNumbers = TextView(context).apply {
             setTextColor(0xFFFF0000.toInt())
             setPadding(8, 8, 8, 8)
@@ -49,6 +55,7 @@ class FileTabAdapter(
                 Toast.makeText(context, "Toggle breakpoint (not implemented)", Toast.LENGTH_SHORT).show()
             }
         }
+        // Редактор текста
         val editor = EditText(context).apply {
             setBackgroundColor(0xFF000000.toInt())
             setTextColor(0xFFFF0000.toInt())
@@ -93,7 +100,7 @@ class FileTabAdapter(
             val builder = StringBuilder()
             for (i in 1..lines) {
                 if (tab.breakpoints.contains(i)) {
-                    builder.append("● ")  // Брекпоинт
+                    builder.append("● ") // Брекпоинт
                 } else {
                     builder.append("   ")
                 }
