@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
                 fileTabs[index].path = it.toString()
                 fileTabs[index].title = it.lastPathSegment ?: "saved.txt"
                 adapter.notifyItemChanged(index)
-                showToast("Saved as \${fileTabs[index].title}")
+                showToast("Saved as ${fileTabs[index].title}")
             } else showToast("Save As failed")
         }
     }
@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Инициализируем элементы UI
         tabLayout = findViewById(R.id.tabLayout)
         viewPager = findViewById(R.id.viewPager)
 
@@ -76,6 +77,13 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = fileTabs[position].title
         }.attach()
+
+        // Делаем хвостик кликабельным для доступа к настройкам
+        val tailHandle = findViewById<View>(R.id.tailHandle)
+        tailHandle.isClickable = true
+        tailHandle.setOnClickListener {
+            SettingsDialog(this) { applyEditorSettings() }.show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -89,7 +97,10 @@ class MainActivity : AppCompatActivity() {
             R.id.menu_open -> { openFileLauncher.launch(arrayOf("*/*")); true }
             R.id.menu_save -> { handleSave(); true }
             R.id.menu_save_as -> { saveAsLauncher.launch("untitled.txt"); true }
-            R.id.menu_settings -> { SettingsDialog(this) { applyEditorSettings() }.show(); true }
+            R.id.menu_settings -> {
+                SettingsDialog(this) { applyEditorSettings() }.show()
+                true
+            }
             R.id.menu_about -> { showToast("CodeEditor98 by Артур"); true }
             else -> super.onOptionsItemSelected(item)
         }
@@ -145,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         if (uriStr != null) {
             val uri = Uri.parse(uriStr)
             if (writeTextToUri(uri, content))
-                showToast("Saved \${tab.title}")
+                showToast("Saved ${tab.title}")
             else showToast("Save failed")
         } else {
             saveAsLauncher.launch(tab.title)
@@ -173,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
-    // Записывает информацию об исключении в файл: /storage/emulated/0/Download/ce98/debug/logs/log.txt
+    // Записываем информацию об исключении в файл: /storage/emulated/0/Download/ce98/debug/logs/log.txt
     private fun writeCrashToFile(throwable: Throwable) {
         try {
             val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -185,7 +196,6 @@ class MainActivity : AppCompatActivity() {
             logFile.appendText("Crash at " + System.currentTimeMillis() + ":\n")
             logFile.appendText(Log.getStackTraceString(throwable) + "\n\n")
         } catch (e: Exception) {
-            // Если запись не удалась, выводим ошибку в Logcat
             Log.e("WriteCrashToFile", "Failed to write crash log", e)
         }
     }
