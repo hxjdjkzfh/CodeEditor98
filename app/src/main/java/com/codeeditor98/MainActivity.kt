@@ -12,8 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,19 +21,32 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: FileTabAdapter
     private val fileTabs = mutableListOf<FileTab>()
 
-    private val openFileLauncher = registerForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
+    private val openFileLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
             val content = readTextFromUri(it)
             if (content != null) {
-                val name = uri.lastPathSegment ?: "opened.txt"
+                val name = it.lastPathSegment ?: "opened.txt"
                 fileTabs.add(FileTab(name, content, it.toString()))
                 adapter.notifyItemInserted(fileTabs.size - 1)
                 viewPager.currentItem = fileTabs.size - 1
                 tabLayout.getTabAt(fileTabs.size - 1)?.select()
             } else {
-                Toast.makeText(this, "Failed to open file", Toast.LENGTH_SHORT).show()
+                showToast("Failed to open file")
+            }
+        }
+    }
+
+    private val saveAsLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+        uri?.let {
+            val index = viewPager.currentItem
+            val content = adapter.getContent(index)
+            if (writeTextToUri(it, content)) {
+                fileTabs[index].path = it.toString()
+                fileTabs[index].title = it.lastPathSegment ?: "saved.txt"
+                adapter.notifyItemChanged(index)
+                showToast("Saved as ${fileTabs[index].title}")
+            } else {
+                showToast("Save As failed")
             }
         }
     }
@@ -71,8 +83,16 @@ class MainActivity : AppCompatActivity() {
                 openFileLauncher.launch(arrayOf("*/*"))
                 true
             }
+            R.id.menu_save -> {
+                handleSave()
+                true
+            }
+            R.id.menu_save_as -> {
+                saveAsLauncher.launch("untitled.txt")
+                true
+            }
             R.id.menu_about -> {
-                Toast.makeText(this, "CodeEditor98 by Артур", Toast.LENGTH_SHORT).show()
+                showToast("CodeEditor98 by Артур")
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -86,6 +106,24 @@ class MainActivity : AppCompatActivity() {
         tabLayout.getTabAt(fileTabs.size - 1)?.select()
     }
 
+    private fun handleSave() {
+        val index = viewPager.currentItem
+        val tab = fileTabs[index]
+        val uriStr = tab.path
+        val content = adapter.getContent(index)
+
+        if (uriStr != null) {
+            val uri = Uri.parse(uriStr)
+            if (writeTextToUri(uri, content)) {
+                showToast("Saved ${tab.title}")
+            } else {
+                showToast("Save failed")
+            }
+        } else {
+            saveAsLauncher.launch(tab.title)
+        }
+    }
+
     private fun readTextFromUri(uri: Uri): String? {
         return try {
             contentResolver.openInputStream(uri)?.use { input ->
@@ -94,5 +132,22 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             null
         }
+    }
+
+    private fun writeTextToUri(uri: Uri, content: String): Boolean {
+        return try {
+            contentResolver.openOutputStream(uri)?.use { output ->
+                BufferedWriter(OutputStreamWriter(output)).use { writer ->
+                    writer.write(content)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 }
