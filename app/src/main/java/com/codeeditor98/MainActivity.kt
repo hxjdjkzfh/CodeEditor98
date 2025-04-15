@@ -1,10 +1,11 @@
 package com.codeeditor98
-import android.util.Log
 
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.*
-import android.widget.LinearLayout   // Добавлен импорт LinearLayout
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,17 @@ import com.google.android.material.tabs.TabLayoutMediator
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
+
+    init {
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            Log.e("Uncaught", "Uncaught exception", throwable)
+            runOnUiThread {
+                Toast.makeText(this, "Crash: " + throwable.localizedMessage, Toast.LENGTH_LONG).show()
+            }
+            writeCrashToFile(throwable)
+            finish()
+        }
+    }
 
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager2
@@ -77,14 +89,13 @@ class MainActivity : AppCompatActivity() {
             R.id.menu_open -> { openFileLauncher.launch(arrayOf("*/*")); true }
             R.id.menu_save -> { handleSave(); true }
             R.id.menu_save_as -> { saveAsLauncher.launch("untitled.txt"); true }
-            R.id.menu_settings -> {
-                SettingsDialog(this) { applyEditorSettings() }.show(); true
-            }
+            R.id.menu_settings -> { SettingsDialog(this) { applyEditorSettings() }.show(); true }
             R.id.menu_about -> { showToast("CodeEditor98 by Артур"); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    // Горячие клавиши: Ctrl+S (Save), Ctrl+Shift+S (Save As), Ctrl+O (Open), Ctrl+N (New)
     override fun dispatchKeyShortcutEvent(event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
             val ctrl = event.isCtrlPressed
@@ -152,7 +163,7 @@ class MainActivity : AppCompatActivity() {
     private fun writeTextToUri(uri: Uri, content: String): Boolean {
         return try {
             contentResolver.openOutputStream(uri)?.use { output ->
-                BufferedWriter(OutputStreamWriter(output)).use { it.write(content) }
+                BufferedWriter(OutputStreamWriter(output)).use { writer -> writer.write(content) }
             }
             true
         } catch (e: Exception) { false }
@@ -160,5 +171,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    // Записывает информацию об исключении в файл: /storage/emulated/0/Download/ce98/debug/logs/log.txt
+    private fun writeCrashToFile(throwable: Throwable) {
+        try {
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val logDir = File(downloadsDir, "ce98/debug/logs")
+            if (!logDir.exists()) {
+                logDir.mkdirs()
+            }
+            val logFile = File(logDir, "log.txt")
+            logFile.appendText("Crash at " + System.currentTimeMillis() + ":\n")
+            logFile.appendText(Log.getStackTraceString(throwable) + "\n\n")
+        } catch (e: Exception) {
+            // Если запись не удалась, выводим ошибку в Logcat
+            Log.e("WriteCrashToFile", "Failed to write crash log", e)
+        }
     }
 }
