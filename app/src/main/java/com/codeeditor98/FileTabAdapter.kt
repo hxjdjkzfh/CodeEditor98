@@ -7,6 +7,7 @@ import android.view.*
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast  // Добавлен импорт для Toast
 import androidx.recyclerview.widget.RecyclerView
 
 data class FileTab(
@@ -45,7 +46,6 @@ class FileTabAdapter(
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
             setOnClickListener {
-                // Здесь можно реализовать переключение брейкпоинтов; для примера просто показываем сообщение.
                 Toast.makeText(context, "Toggle breakpoint (not implemented)", Toast.LENGTH_SHORT).show()
             }
         }

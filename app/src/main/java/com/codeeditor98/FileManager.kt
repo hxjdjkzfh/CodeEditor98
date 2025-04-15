@@ -4,7 +4,6 @@ import android.app.Activity
 import java.io.File
 
 class FileManager(private val activity: Activity) {
-
     fun openFile(path: String): String? {
         return try {
             File(path).readText()
@@ -12,13 +11,10 @@ class FileManager(private val activity: Activity) {
             null
         }
     }
-
     fun saveFile(path: String, content: String): Boolean {
         return try {
             File(path).writeText(content)
             true
-        } catch (e: Exception) {
-            false
-        }
+        } catch (e: Exception) { false }
     }
 }
