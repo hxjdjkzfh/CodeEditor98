@@ -6,5 +6,6 @@ data class FileTab(
     var path: String? = null,
     var saved: Boolean = false,
     var fontSize: Float = 16f,
-    var showLineNumbers: Boolean = true
+    var showLineNumbers: Boolean = true,
+    var lastSaved: Long = System.currentTimeMillis()
 )
