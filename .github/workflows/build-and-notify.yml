@@ -46,3 +46,4 @@ jobs:
                  -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
                  --data-urlencode "text=❌ Build failed for \`${{ github.repository }}\`\nCommit: \`${{ github.sha }}\`\n\`\`\`\n$(tail -n 30 build.log | head -c 3500)\n\`\`\`"
           fi
+# trigger
