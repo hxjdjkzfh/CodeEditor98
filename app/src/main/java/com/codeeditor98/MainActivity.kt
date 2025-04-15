@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         val fontSize = prefs.getInt("fontSize", 16)
         adapter.setFontSize(fontSize)
         findViewById<View>(R.id.tailHandle)?.isVisible = prefs.getBoolean("showTail", true)
-        val layout = findViewById<LinearLayout>(R.id.editorLayout)
+        val layout = findViewById<LinearLayout>(R.id.editorContainer)
         layout.orientation = when (prefs.getString("panelSide", "bottom")) {
             "left", "right" -> LinearLayout.HORIZONTAL
             else -> LinearLayout.VERTICAL
