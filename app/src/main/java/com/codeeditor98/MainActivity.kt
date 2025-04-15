@@ -1,14 +1,43 @@
 package com.codeeditor98
 
-import android.content.Context import android.net.Uri import android.os.Bundle import androidx.activity.ComponentActivity import androidx.activity.compose.setContent import androidx.activity.compose.rememberLauncherForActivityResult import androidx.activity.result.contract.ActivityResultContracts import androidx.compose.foundation.background import androidx.compose.foundation.clickable import androidx.compose.foundation.layout.* import androidx.compose.material3.* import androidx.compose.runtime.* import androidx.compose.ui.Alignment import androidx.compose.ui.Modifier import androidx.compose.ui.graphics.Color import androidx.compose.ui.platform.LocalContext import androidx.compose.ui.text.input.TextFieldValue import androidx.compose.ui.unit.dp import androidx.compose.ui.unit.sp import androidx.compose.ui.window.Dialog import dev.sora.editor.CodeEditorView import dev.sora.editor.component.lang.* import java.io.OutputStreamWriter
+import android.net.Uri
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.lang.*
+import java.io.OutputStreamWriter
+import kotlin.reflect.KProperty
 
-class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState) setContent { val context = LocalContext.current val darkTheme = remember { mutableStateOf(loadPref(context, "darkTheme", false)) }
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            val context = LocalContext.current
+            val darkTheme = remember { mutableStateOf(loadPref(context, "darkTheme", false)) }
 
-CompositionLocalProvider(LocalDarkTheme provides darkTheme.value) {
-            MaterialTheme(
-                colorScheme = if (darkTheme.value) darkColorScheme() else lightColorScheme()
-            ) {
-                CodeEditorWithSettings(darkTheme)
+            CompositionLocalProvider(LocalDarkTheme provides darkTheme.value) {
+                MaterialTheme(
+                    colorScheme = if (darkTheme.value) darkColorScheme() else lightColorScheme()
+                ) {
+                    CodeEditorWithSettings(darkTheme)
+                }
             }
         }
     }
@@ -28,7 +57,7 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
     var panelSide by remember { mutableStateOf(loadPref(context, "panelSide", "bottom")) }
 
     var showSettings by remember { mutableStateOf(false) }
-    var editorView: CodeEditorView? by remember { mutableStateOf(null) }
+    val editorView = remember { mutableStateOf<CodeEditor?>(null) }
 
     val openLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri?.let {
@@ -37,7 +66,7 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
             }
             fileUri = uri
             fileName = uri.lastPathSegment ?: "file.txt"
-            editorView?.apply {
+            editorView.value?.apply {
                 setEditorLanguage(resolveLang(language))
                 setText(codeText)
                 textSize = fontSize.toFloat()
@@ -65,7 +94,7 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
                     Button(onClick = { openLauncher.launch(arrayOf("*/*")) }) { Text("Open") }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = {
-                        codeText = editorView?.text.toString()
+                        codeText = editorView.value?.text?.toString() ?: ""
                         if (fileUri != null) {
                             context.contentResolver.openOutputStream(fileUri!!)?.let { out ->
                                 OutputStreamWriter(out).use { writer -> writer.write(codeText) }
@@ -80,16 +109,22 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
     ) { padding ->
         Column(Modifier.padding(padding)) {
             if (showTail && panelSide == "bottom") {
-                Box(Modifier.fillMaxWidth().clickable { showSettings = true }.padding(6.dp)) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { showSettings = true }
+                        .padding(6.dp)
+                ) {
                     Divider(thickness = 4.dp, color = Color.Gray, modifier = Modifier.align(Alignment.Center))
                 }
             }
+
             AndroidView(factory = { ctx ->
-                CodeEditorView(ctx).apply {
+                CodeEditor(ctx).apply {
                     setEditorLanguage(resolveLang(language))
                     setText(codeText)
                     textSize = fontSize.toFloat()
-                    editorView = this
+                    editorView.value = this
                 }
             }, modifier = Modifier.weight(1f))
         }
@@ -107,7 +142,7 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
                                 it.toIntOrNull()?.let {
                                     fontSize = it
                                     savePref(context, "fontSize", it)
-                                    editorView?.textSize = it.toFloat()
+                                    editorView.value?.textSize = it.toFloat()
                                 }
                             },
                             label = { Text("Font Size") },
@@ -116,17 +151,16 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
                         Spacer(Modifier.height(8.dp))
 
                         Text("Language")
-                        DropdownMenu(expanded = true, onDismissRequest = {}) {
-                            listOf("text", "java", "kotlin", "python", "cpp", "js").forEach {
-                                DropdownMenuItem(text = { Text(it) }, onClick = {
-                                    language = it
-                                    savePref(context, "language", it)
-                                    editorView?.setEditorLanguage(resolveLang(it))
-                                    showSettings = false
-                                })
-                            }
+                        val langs = listOf("text", "java", "kotlin", "python", "cpp", "js")
+                        langs.forEach {
+                            Button(onClick = {
+                                language = it
+                                savePref(context, "language", it)
+                                editorView.value?.setEditorLanguage(resolveLang(it))
+                                showSettings = false
+                            }) { Text(it) }
+                            Spacer(Modifier.height(4.dp))
                         }
-                        Spacer(Modifier.height(8.dp))
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(checked = autoSave, onCheckedChange = {
@@ -147,14 +181,13 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
                         }
 
                         Text("Panel Position")
-                        DropdownMenu(expanded = true, onDismissRequest = {}) {
-                            listOf("bottom", "left", "right").forEach {
-                                DropdownMenuItem(text = { Text(it) }, onClick = {
-                                    panelSide = it
-                                    savePref(context, "panelSide", it)
-                                    showSettings = false
-                                })
-                            }
+                        listOf("bottom", "left", "right").forEach {
+                            Button(onClick = {
+                                panelSide = it
+                                savePref(context, "panelSide", it)
+                                showSettings = false
+                            }) { Text(it) }
+                            Spacer(Modifier.height(4.dp))
                         }
                     }
                 }
@@ -163,7 +196,7 @@ fun CodeEditorWithSettings(darkTheme: MutableState<Boolean>) {
     }
 }
 
-private fun resolveLang(type: String): IEditorLanguage {
+private fun resolveLang(type: String): io.github.rosemoe.sora.lang.EditorLanguage {
     return when (type) {
         "java" -> LanguageJava()
         "kotlin" -> LanguageKotlin()
@@ -173,35 +206,3 @@ private fun resolveLang(type: String): IEditorLanguage {
         else -> LanguageText()
     }
 }
-
-private fun loadPref(context: Context, key: String, def: Boolean): Boolean {
-    return context.getSharedPreferences("editor_prefs", Context.MODE_PRIVATE).getBoolean(key, def)
-}
-
-private fun savePref(context: Context, key: String, value: Boolean) {
-    context.getSharedPreferences("editor_prefs", Context.MODE_PRIVATE)
-        .edit().putBoolean(key, value).apply()
-}
-
-private fun loadPref(context: Context, key: String, def: Int): Int {
-    return context.getSharedPreferences("editor_prefs", Context.MODE_PRIVATE).getInt(key, def)
-}
-
-private fun savePref(context: Context, key: String, value: Int) {
-    context.getSharedPreferences("editor_prefs", Context.MODE_PRIVATE)
-        .edit().putInt(key, value).apply()
-}
-
-private fun loadPref(context: Context, key: String, def: String): String {
-    return context.getSharedPreferences("editor_prefs", Context.MODE_PRIVATE).getString(key, def) ?: def
-}
-
-private fun savePref(context: Context, key: String, value: String) {
-    context.getSharedPreferences("editor_prefs", Context.MODE_PRIVATE)
-        .edit().putString(key, value).apply()
-}
-
-private val LocalDarkTheme = compositionLocalOf { false }
-
-}
-
