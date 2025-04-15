@@ -49,8 +49,6 @@ repositories {
 
 
 dependencies {
-    implementation(files("libs/editor-release.aar"))
-    implementation(files("libs/language-textmate.aar"))
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.core:core-ktx:1.12.0")
