@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_new" android:title="\\N New" />
-    <item android:id="@+id/menu_open" android:title="\\O Open" />
+    <item android:id="@+id/menu_new" android:title="\N New" />
+    <item android:id="@+id/menu_open" android:title="\O Open" />
     <item android:id="@+id/menu_save" android:title="Save" />
     <item android:id="@+id/menu_save_as" android:title="Save As..." />
     <item android:id="@+id/menu_settings" android:title="Settings" />

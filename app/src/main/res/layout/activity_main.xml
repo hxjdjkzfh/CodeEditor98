@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#000000"
+    android:id="@+id/editorLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
-    <!-- Панель вкладок сверху -->
     <LinearLayout
-        android:id="@+id/editorLayout"
+        android:id="@+id/editorContainer"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
-            android:background="#111"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:background="#111111"/>
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
@@ -24,12 +24,11 @@
             android:layout_weight="1"/>
     </LinearLayout>
 
-    <!-- Хвостик — ручка -->
     <View
         android:id="@+id/tailHandle"
         android:layout_width="60dp"
         android:layout_height="6dp"
-        android:background="#444"
+        android:background="#444444"
         android:layout_gravity="bottom|center_horizontal"
         android:visibility="gone"/>
 </FrameLayout>
