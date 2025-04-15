@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager2
     private lateinit var adapter: FileTabAdapter
-
     private val fileTabs = mutableListOf<FileTab>()
 
     private val openFileLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -29,9 +28,7 @@ class MainActivity : AppCompatActivity() {
                 adapter.notifyItemInserted(fileTabs.size - 1)
                 viewPager.currentItem = fileTabs.size - 1
                 tabLayout.getTabAt(fileTabs.size - 1)?.select()
-            } else {
-                showToast("Failed to open file")
-            }
+            } else showToast("Failed to open file")
         }
     }
 
@@ -44,9 +41,7 @@ class MainActivity : AppCompatActivity() {
                 fileTabs[index].title = it.lastPathSegment ?: "saved.txt"
                 adapter.notifyItemChanged(index)
                 showToast("Saved as ${fileTabs[index].title}")
-            } else {
-                showToast("Save As failed")
-            }
+            } else showToast("Save As failed")
         }
     }
 
@@ -62,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         viewPager.adapter = adapter
 
         applyEditorSettings()
-
         addNewTab()
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
@@ -77,41 +71,56 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.menu_new -> {
-                addNewTab()
-                true
-            }
-            R.id.menu_open -> {
-                openFileLauncher.launch(arrayOf("*/*"))
-                true
-            }
-            R.id.menu_save -> {
-                handleSave()
-                true
-            }
-            R.id.menu_save_as -> {
-                saveAsLauncher.launch("untitled.txt")
-                true
-            }
+            R.id.menu_new -> { addNewTab(); true }
+            R.id.menu_open -> { openFileLauncher.launch(arrayOf("*/*")); true }
+            R.id.menu_save -> { handleSave(); true }
+            R.id.menu_save_as -> { saveAsLauncher.launch("untitled.txt"); true }
             R.id.menu_settings -> {
-                SettingsDialog(this) {
-                    applyEditorSettings()
-                }.show()
-                true
+                SettingsDialog(this) { applyEditorSettings() }.show(); true
             }
             R.id.menu_about -> {
-                showToast("CodeEditor98 by Артур")
-                true
+                showToast("CodeEditor98 by Артур"); true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun dispatchKeyShortcutEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            val ctrl = event.isCtrlPressed
+            val shift = event.isShiftPressed
+            val key = event.keyCode
+
+            when {
+                ctrl && key == KeyEvent.KEYCODE_S -> {
+                    if (shift) saveAsLauncher.launch("untitled.txt")
+                    else handleSave()
+                    return true
+                }
+                ctrl && key == KeyEvent.KEYCODE_O -> {
+                    openFileLauncher.launch(arrayOf("*/*"))
+                    return true
+                }
+                ctrl && key == KeyEvent.KEYCODE_N -> {
+                    addNewTab()
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyShortcutEvent(event)
     }
 
     private fun applyEditorSettings() {
         val prefs = getSharedPreferences("settings", MODE_PRIVATE)
         val fontSize = prefs.getInt("fontSize", 16)
         adapter.setFontSize(fontSize)
-        // Хвостик и позиция панели можно применить здесь, если появится соответствующий UI
+
+        findViewById<View>(R.id.tailHandle).isVisible = prefs.getBoolean("showTail", true)
+        val layout = findViewById<LinearLayout>(R.id.editorLayout)
+        layout.orientation = when (prefs.getString("panelSide", "bottom")) {
+            "left", "right" -> LinearLayout.HORIZONTAL
+            else -> LinearLayout.VERTICAL
+        }
     }
 
     private fun addNewTab() {
@@ -129,11 +138,8 @@ class MainActivity : AppCompatActivity() {
 
         if (uriStr != null) {
             val uri = Uri.parse(uriStr)
-            if (writeTextToUri(uri, content)) {
-                showToast("Saved ${tab.title}")
-            } else {
-                showToast("Save failed")
-            }
+            if (writeTextToUri(uri, content)) showToast("Saved ${tab.title}")
+            else showToast("Save failed")
         } else {
             saveAsLauncher.launch(tab.title)
         }
@@ -141,25 +147,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun readTextFromUri(uri: Uri): String? {
         return try {
-            contentResolver.openInputStream(uri)?.use { input ->
-                BufferedReader(InputStreamReader(input)).readText()
+            contentResolver.openInputStream(uri)?.use {
+                BufferedReader(InputStreamReader(it)).readText()
             }
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) { null }
     }
 
     private fun writeTextToUri(uri: Uri, content: String): Boolean {
         return try {
             contentResolver.openOutputStream(uri)?.use { output ->
-                BufferedWriter(OutputStreamWriter(output)).use { writer ->
-                    writer.write(content)
-                }
+                BufferedWriter(OutputStreamWriter(output)).use { it.write(content) }
             }
             true
-        } catch (e: Exception) {
-            false
-        }
+        } catch (e: Exception) { false }
     }
 
     private fun showToast(msg: String) {
