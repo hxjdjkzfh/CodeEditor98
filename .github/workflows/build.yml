@@ -1,4 +1,4 @@
-name: Build CodeEditor98 with Telegram Alerts
+name: Build CodeEditor98 with Telegram Alerts (Inline)
 
 on:
   push:
@@ -8,11 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build APK
     runs-on: ubuntu-latest
-    env:
-      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     steps:
       - name: Checkout repo
@@ -24,30 +20,21 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
       - name: Build APK
-        id: build
-        run: ./gradlew assembleDebug
-
-      - name: Upload APK artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: CodeEditor98.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
 
       - name: Send APK to Telegram
         if: success()
         run: |
           curl -F document=@app/build/outputs/apk/debug/app-debug.apk \
-               -F chat_id="$TELEGRAM_CHAT_ID" \
+               -F chat_id="PASTE_YOUR_CHAT_ID_HERE" \
                -F caption="✅ CodeEditor98 build succeeded" \
-               "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
+               "https://api.telegram.org/botPASTE_YOUR_TOKEN_HERE/sendDocument"
 
       - name: Send error to Telegram
         if: failure()
         run: |
-          echo "❌ CodeEditor98 build failed" | curl -F chat_id="$TELEGRAM_CHAT_ID" \
-               -F text=@- "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage"
+          echo "❌ CodeEditor98 build failed" | curl -F chat_id="PASTE_YOUR_CHAT_ID_HERE" \
+               -F text=@- "https://api.telegram.org/botPASTE_YOUR_TOKEN_HERE/sendMessage"
