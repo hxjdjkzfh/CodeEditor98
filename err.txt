@@ -1,0 +1,100 @@
+	at org.gradle.tooling.internal.provider.SessionFailureReportingActionExecuter.execute(SessionFailureReportingActionExecuter.java:51)
+	at org.gradle.tooling.internal.provider.SessionFailureReportingActionExecuter.execute(SessionFailureReportingActionExecuter.java:39)
+	at org.gradle.tooling.internal.provider.SetupLoggingActionExecuter.execute(SetupLoggingActionExecuter.java:47)
+	at org.gradle.tooling.internal.provider.SetupLoggingActionExecuter.execute(SetupLoggingActionExecuter.java:31)
+	at org.gradle.launcher.daemon.server.exec.ExecuteBuild.doBuild(ExecuteBuild.java:65)
+	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.WatchForDisconnection.execute(WatchForDisconnection.java:39)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.ResetDeprecationLogger.execute(ResetDeprecationLogger.java:29)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.RequestStopIfSingleUsedDaemon.execute(RequestStopIfSingleUsedDaemon.java:35)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.ForwardClientInput$2.create(ForwardClientInput.java:78)
+	at org.gradle.launcher.daemon.server.exec.ForwardClientInput$2.create(ForwardClientInput.java:75)
+	at org.gradle.util.internal.Swapper.swap(Swapper.java:38)
+	at org.gradle.launcher.daemon.server.exec.ForwardClientInput.execute(ForwardClientInput.java:75)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.LogAndCheckHealth.execute(LogAndCheckHealth.java:64)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.LogToClient.doBuild(LogToClient.java:63)
+	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.EstablishBuildEnvironment.doBuild(EstablishBuildEnvironment.java:84)
+	at org.gradle.launcher.daemon.server.exec.BuildCommandOnly.execute(BuildCommandOnly.java:37)
+	at org.gradle.launcher.daemon.server.api.DaemonCommandExecution.proceed(DaemonCommandExecution.java:104)
+	at org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy$1.run(StartBuildOrRespondWithBusy.java:52)
+	at org.gradle.launcher.daemon.server.DaemonStateCoordinator$1.run(DaemonStateCoordinator.java:297)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+Caused by: org.gradle.api.internal.tasks.TaskDependencyResolveException: Could not determine the dependencies of null.
+	at org.gradle.api.internal.tasks.CachingTaskDependencyResolveContext.getDependencies(CachingTaskDependencyResolveContext.java:68)
+	at org.gradle.api.internal.tasks.AbstractTaskDependency.getDependenciesForInternalUse(AbstractTaskDependency.java:74)
+	at org.gradle.api.internal.tasks.TaskDependencyUtil.getDependenciesForInternalUse(TaskDependencyUtil.java:40)
+	at org.gradle.api.internal.tasks.TaskDependencyUtil.getDependenciesForInternalUse(TaskDependencyUtil.java:45)
+	at org.gradle.api.internal.provider.BuildableBackedProvider.buildableDependencies(BuildableBackedProvider.java:73)
+	at org.gradle.api.internal.provider.BuildableBackedProvider.access$000(BuildableBackedProvider.java:28)
+	at org.gradle.api.internal.provider.BuildableBackedProvider$1.visitProducerTasks(BuildableBackedProvider.java:53)
+	at org.gradle.api.internal.file.collections.ProviderBackedFileCollection.visitDependencies(ProviderBackedFileCollection.java:53)
+	at org.gradle.api.internal.tasks.CachingTaskDependencyResolveContext$TaskGraphImpl.getNodeValues(CachingTaskDependencyResolveContext.java:103)
+	at org.gradle.internal.graph.CachingDirectedGraphWalker$GraphWithEmptyEdges.getNodeValues(CachingDirectedGraphWalker.java:213)
+	at org.gradle.internal.graph.CachingDirectedGraphWalker.doSearch(CachingDirectedGraphWalker.java:121)
+	at org.gradle.internal.graph.CachingDirectedGraphWalker.findValues(CachingDirectedGraphWalker.java:73)
+	at org.gradle.api.internal.tasks.CachingTaskDependencyResolveContext.getDependencies(CachingTaskDependencyResolveContext.java:66)
+	... 143 more
+Caused by: com.android.builder.errors.EvalIssueException: Failed to install the following Android SDK packages as some licences have not been accepted.
+   platforms;android-34 Android SDK Platform 34
+   build-tools;33.0.1 Android SDK Build-Tools 33.0.1
+To build this project, accept the SDK license agreements and install the missing components using the Android Studio SDK Manager.
+All licenses can be accepted using the sdkmanager command line tool:
+sdkmanager.bat --licenses
+Or, to transfer the license agreements from one workstation to another, see https://developer.android.com/studio/intro/update.html#download-with-gradle
+
+Using Android SDK: /data/data/com.termux/files/home/CodeEditor98
+	at com.android.builder.errors.IssueReporter.reportError(IssueReporter.kt:114)
+	at com.android.builder.errors.IssueReporter.reportError$default(IssueReporter.kt:110)
+	at com.android.builder.errors.IssueReporter.reportError(IssueReporter.kt)
+	at com.android.build.gradle.internal.SdkHandler.initTarget(SdkHandler.java:133)
+	at com.android.build.gradle.internal.SdkFullLoadingStrategy.init(SdkFullLoadingStrategy.kt:49)
+	at com.android.build.gradle.internal.SdkFullLoadingStrategy.getFileFromTarget(SdkFullLoadingStrategy.kt:64)
+	at com.android.build.gradle.internal.SdkFullLoadingStrategy.getCoreForSystemModulesJar(SdkFullLoadingStrategy.kt:102)
+	at com.android.build.gradle.internal.SdkLoadingStrategy.getCoreForSystemModulesJar(SdkLoadingStrategy.kt:53)
+	at com.android.build.gradle.internal.SdkComponentsBuildService$VersionedSdkLoader$coreForSystemModulesProvider$1.call(SdkComponents.kt:286)
+	at com.android.build.gradle.internal.SdkComponentsBuildService$VersionedSdkLoader$coreForSystemModulesProvider$1.call(SdkComponents.kt:285)
+	at org.gradle.api.internal.provider.DefaultProvider.calculateOwnValue(DefaultProvider.java:72)
+	at org.gradle.api.internal.provider.AbstractMinimalProvider.calculateValue(AbstractMinimalProvider.java:115)
+	at org.gradle.api.internal.provider.FlatMapProvider.calculateOwnValue(FlatMapProvider.java:53)
+	at org.gradle.api.internal.provider.AbstractMinimalProvider.calculateOwnPresentValue(AbstractMinimalProvider.java:80)
+	at org.gradle.api.internal.provider.AbstractMinimalProvider.get(AbstractMinimalProvider.java:100)
+	at org.gradle.api.internal.provider.ProviderResolutionStrategy$2.resolve(ProviderResolutionStrategy.java:33)
+	at org.gradle.api.internal.file.collections.ProviderBackedFileCollection.visitDependencies(ProviderBackedFileCollection.java:57)
+	at org.gradle.api.internal.AbstractTaskDependencyContainerVisitingContext.add(AbstractTaskDependencyContainerVisitingContext.java:46)
+	at org.gradle.api.internal.file.collections.UnpackingVisitor.add(UnpackingVisitor.java:77)
+	at org.gradle.api.internal.file.collections.DefaultConfigurableFileCollection$UnresolvedItemsCollector.visitContents(DefaultConfigurableFileCollection.java:593)
+	at org.gradle.api.internal.file.collections.DefaultConfigurableFileCollection.visitChildren(DefaultConfigurableFileCollection.java:440)
+	at org.gradle.api.internal.file.CompositeFileCollection.visitDependencies(CompositeFileCollection.java:102)
+	at org.gradle.api.internal.file.collections.DefaultConfigurableFileCollection.visitDependencies(DefaultConfigurableFileCollection.java:446)
+	at org.gradle.api.internal.AbstractTaskDependencyContainerVisitingContext.add(AbstractTaskDependencyContainerVisitingContext.java:46)
+	at org.gradle.api.internal.file.AbstractFileCollection.lambda$getBuildDependencies$0(AbstractFileCollection.java:99)
+	at org.gradle.api.internal.tasks.DefaultTaskDependency.visitDependencies(DefaultTaskDependency.java:151)
+	at org.gradle.api.internal.AbstractTaskDependencyContainerVisitingContext.add(AbstractTaskDependencyContainerVisitingContext.java:46)
+	at org.gradle.api.internal.artifacts.ivyservice.resolveengine.artifact.LocalFileDependencyBackedArtifactSet.visitDependencies(LocalFileDependencyBackedArtifactSet.java:186)
+	at org.gradle.api.internal.AbstractTaskDependencyContainerVisitingContext.add(AbstractTaskDependencyContainerVisitingContext.java:46)
+	at org.gradle.api.internal.artifacts.ivyservice.resolveengine.artifact.DefaultSelectedArtifactSet.visitDependencies(DefaultSelectedArtifactSet.java:47)
+	at org.gradle.api.internal.artifacts.configurations.ResolutionBackedFileCollection.visitDependencies(ResolutionBackedFileCollection.java:59)
+	at org.gradle.api.internal.tasks.CachingTaskDependencyResolveContext$TaskGraphImpl.getNodeValues(CachingTaskDependencyResolveContext.java:103)
+	at org.gradle.internal.graph.CachingDirectedGraphWalker$GraphWithEmptyEdges.getNodeValues(CachingDirectedGraphWalker.java:213)
+	at org.gradle.internal.graph.CachingDirectedGraphWalker.doSearch(CachingDirectedGraphWalker.java:121)
+	at org.gradle.internal.graph.CachingDirectedGraphWalker.findValues(CachingDirectedGraphWalker.java:73)
+	at org.gradle.api.internal.tasks.CachingTaskDependencyResolveContext.getDependencies(CachingTaskDependencyResolveContext.java:66)
+	... 155 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.7/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 985ms
