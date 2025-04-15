@@ -1,4 +1,4 @@
-name: Build CodeEditor98 with Telegram Alerts
+name: Build CodeEditor98 with Telegram Alerts (Short Errors)
 
 on:
   push:
@@ -23,10 +23,10 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Build APK
+      - name: Build APK (log to file)
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug > build.log 2>&1 || echo "BUILD_FAILED" > failed.flag
 
       - name: Send APK to Telegram
         if: success()
@@ -36,9 +36,11 @@ jobs:
                -F caption="✅ CodeEditor98 build succeeded" \
                "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
 
-      - name: Send error to Telegram
+      - name: Send filtered error to Telegram
         if: failure()
         run: |
+          tail -n 50 build.log | grep -E 'FAILED|FAILURE|error|Exception|Could not' | tail -n 15 > short_error.txt
           curl -F chat_id="$TELEGRAM_CHAT_ID" \
-               -F text="❌ CodeEditor98 build failed during GitHub Actions" \
-               "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage"
+               -F caption="❌ CodeEditor98 build failed" \
+               -F document=@short_error.txt \
+               "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
