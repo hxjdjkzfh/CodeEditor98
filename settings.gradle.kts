@@ -1,4 +1,3 @@
-
 dependencyResolutionManagement {
     repositories {
         google()
@@ -8,4 +7,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "CodeEditor98"
 include(":app")
-
