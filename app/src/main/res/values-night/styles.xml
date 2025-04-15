@@ -1,0 +1,10 @@
+<resources>
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:textColor">#FF0000</item>
+        <item name="android:colorAccent">#FF0000</item>
+        <item name="android:colorControlHighlight">#FF0000</item>
+        <item name="android:editTextBackground">#222222</item>
+        <item name="android:textColorHint">#888888</item>
+    </style>
+</resources>
