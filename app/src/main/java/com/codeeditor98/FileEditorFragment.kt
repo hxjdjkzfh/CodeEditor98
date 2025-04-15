@@ -1,15 +1,13 @@
 package com.codeeditor98
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.*
-import android.widget.EditText
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 
 class FileEditorFragment : Fragment() {
-
     private lateinit var tab: FileTab
+    private lateinit var textView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,26 +15,36 @@ class FileEditorFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val editor = EditText(requireContext()).apply {
-            setText(tab.content)
+        textView = TextView(requireContext()).apply {
+            text = tab.content
             setTextColor(0xFFFF0000.toInt())
             setBackgroundColor(0xFF000000.toInt())
-            textSize = 16f
+            textSize = tab.fontSize
+            setPadding(20, 20, 20, 20)
+            isVerticalScrollBarEnabled = true
+            isHorizontalScrollBarEnabled = true
         }
 
-        editor.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                val newText = s.toString()
-                if (newText != tab.content) {
-                    tab.content = newText
-                    tab.saved = false
-                    MainActivity.updateTabColor()
-                }
+        val gestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                tab.fontSize *= detector.scaleFactor
+                tab.fontSize = tab.fontSize.coerceIn(8f, 40f)
+                textView.textSize = tab.fontSize
+                return true
             }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        return editor
+        textView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            false
+        }
+
+        if (tab.showLineNumbers) {
+            val lines = tab.content.lines()
+            val numbered = lines.mapIndexed { i, line -> "${i + 1}: $line" }.joinToString("\n")
+            textView.text = numbered
+        }
+
+        return textView
     }
 }
