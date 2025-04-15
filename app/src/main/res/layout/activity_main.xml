@@ -1,34 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/editorRoot"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/editorContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:orientation="vertical">
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <LinearLayout
-        android:id="@+id/editorContainer"
-        android:orientation="vertical"
+        android:id="@+id/settingsPanel"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#222"
+        android:padding="8dp"
+        android:visibility="gone">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#111111"/>
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+        <Button android:id="@+id/btnNew" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="New"/>
+        <Button android:id="@+id/btnOpen" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Open"/>
+        <Button android:id="@+id/btnSave" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Save"/>
+        <Button android:id="@+id/btnSaveAs" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Save As"/>
+        <Button android:id="@+id/btnSettings" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Settings"/>
+        <Button android:id="@+id/btnAbout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="About"/>
     </LinearLayout>
 
     <View
         android:id="@+id/tailHandle"
-        android:layout_width="60dp"
-        android:layout_height="6dp"
-        android:background="#444444"
-        android:layout_gravity="bottom|center_horizontal"
-        android:visibility="gone"/>
-</FrameLayout>
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:background="#555"/>
+</LinearLayout>
