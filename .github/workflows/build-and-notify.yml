@@ -1,4 +1,7 @@
 name: Build and Notify via Telegram
+on:
+  push:
+  workflow_dispatch:
 
 on:
   push:
