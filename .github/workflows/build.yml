@@ -1,4 +1,4 @@
-name: Build CodeEditor98 with Telegram Alerts (Hardcoded)
+name: Build CodeEditor98 with Telegram Alerts (Fixed)
 
 on:
   push:
@@ -36,5 +36,6 @@ jobs:
       - name: Send error to Telegram
         if: failure()
         run: |
-          echo "❌ CodeEditor98 build failed" | curl -F chat_id="6817339254" \
-               -F text=@- "https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage"
+          curl -F chat_id="6817339254" \
+               -F text="❌ CodeEditor98 build failed during GitHub Actions" \
+               "https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage"
