@@ -10,9 +10,10 @@ object FileUtils {
 
     fun saveToFile(tab: FileTab): Boolean {
         try {
-            val file = if (tab.path != null) File(tab.path!!) else return false
+            val file = tab.path?.let { File(it) } ?: return false
             file.writeText(tab.content)
             tab.saved = true
+            tab.lastSaved = System.currentTimeMillis()
             return true
         } catch (_: Exception) {}
         return false
@@ -27,7 +28,21 @@ object FileUtils {
             tab.path = file.absolutePath
             tab.title = file.name
             tab.saved = true
+            tab.lastSaved = System.currentTimeMillis()
             return true
+        } catch (_: Exception) {}
+        return false
+    }
+
+    fun rename(tab: FileTab, newName: String): Boolean {
+        try {
+            val old = tab.path?.let { File(it) } ?: return false
+            val new = File(old.parent, newName)
+            if (old.renameTo(new)) {
+                tab.path = new.absolutePath
+                tab.title = new.name
+                return true
+            }
         } catch (_: Exception) {}
         return false
     }
