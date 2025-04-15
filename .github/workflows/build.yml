@@ -1,4 +1,4 @@
-name: Build CodeEditor98 with Telegram Alerts (Inline)
+name: Build CodeEditor98 with Telegram Alerts (Hardcoded)
 
 on:
   push:
@@ -29,12 +29,12 @@ jobs:
         if: success()
         run: |
           curl -F document=@app/build/outputs/apk/debug/app-debug.apk \
-               -F chat_id="PASTE_YOUR_CHAT_ID_HERE" \
+               -F chat_id="6817339254" \
                -F caption="✅ CodeEditor98 build succeeded" \
-               "https://api.telegram.org/botPASTE_YOUR_TOKEN_HERE/sendDocument"
+               "https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendDocument"
 
       - name: Send error to Telegram
         if: failure()
         run: |
-          echo "❌ CodeEditor98 build failed" | curl -F chat_id="PASTE_YOUR_CHAT_ID_HERE" \
-               -F text=@- "https://api.telegram.org/botPASTE_YOUR_TOKEN_HERE/sendMessage"
+          echo "❌ CodeEditor98 build failed" | curl -F chat_id="6817339254" \
+               -F text=@- "https://api.telegram.org/bot7798688149:AAHvjk1uDJSxXuX03_GuKAa7ClNYKpp93j8/sendMessage"
