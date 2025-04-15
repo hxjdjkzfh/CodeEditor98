@@ -1,4 +1,4 @@
-name: CodeEditor98 CI with Telegram Reporting
+name: CodeEditor98 CI with Script Error Detection
 
 on:
   push:
@@ -29,15 +29,14 @@ jobs:
           ./gradlew assembleDebug > build.log 2>&1 || true
 
           if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
-            echo "[DEBUG] APK found"
             curl -F document=@app/build/outputs/apk/debug/app-debug.apk \
                  -F chat_id="$TELEGRAM_CHAT_ID" \
                  -F caption="✅ CodeEditor98 build succeeded" \
                  "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
           else
-            echo "[DEBUG] APK not found, extracting error..."
-            LOG=$(tail -n 150 build.log | grep -iE 'FAILED|FAILURE|error|Exception|Could not|> Task' | tail -n 20 | sed 's/`/\\`/g' | sed 's/\r//' )
-            TEXT="❌ *CodeEditor98 build failed*\n\`\`\`\n$LOG\n\`\`\`"
+            echo "[DEBUG] Build failed. Trying to extract error..."
+            ERROR=$(grep -iE 'Script compilation error|unexpected|unresolved|FAILURE:|> Task|Exception' build.log | tail -n 20 | sed 's/`/\\`/g')
+            TEXT="❌ *CodeEditor98 build failed*\n\`\`\`\n$ERROR\n\`\`\`"
             curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
               -d chat_id="$TELEGRAM_CHAT_ID" \
               -d parse_mode=MarkdownV2 \
