@@ -1,11 +1,12 @@
 package com.codeeditor98
 
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
 data class FileTab(
@@ -35,8 +36,6 @@ class FileTabAdapter(
         val layout = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
         }
-
-        // TextView для номеров строк с поддержкой "брейкпоинтов"
         val lineNumbers = TextView(context).apply {
             setTextColor(0xFFFF0000.toInt())
             setPadding(8, 8, 8, 8)
@@ -45,15 +44,11 @@ class FileTabAdapter(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
-            // При нажатии на номер строки, как пример — показываем Toast.
             setOnClickListener {
-                // Здесь можно реализовать логику переключения брейкпоинта для выбранной строки.
-                // Пока просто покажем сообщение.
+                // Здесь можно реализовать переключение брейкпоинтов; для примера просто показываем сообщение.
                 Toast.makeText(context, "Toggle breakpoint (not implemented)", Toast.LENGTH_SHORT).show()
             }
         }
-
-        // Редактор текста для файла
         val editor = EditText(context).apply {
             setBackgroundColor(0xFF000000.toInt())
             setTextColor(0xFFFF0000.toInt())
@@ -65,10 +60,8 @@ class FileTabAdapter(
                 1f
             )
         }
-
         layout.addView(lineNumbers)
         layout.addView(editor)
-
         return FileViewHolder(layout, editor, lineNumbers)
     }
 
@@ -78,8 +71,8 @@ class FileTabAdapter(
         holder.editor.textSize = fontSize.toFloat()
         holder.lineNumbers.textSize = fontSize.toFloat()
         holder.updateLineNumbers(tab)
-        holder.editor.addTextChangedListener(object : android.text.TextWatcher {
-            override fun afterTextChanged(s: android.text.Editable?) {
+        holder.editor.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
                 tab.content = s.toString()
                 holder.updateLineNumbers(tab)
             }
@@ -96,12 +89,11 @@ class FileTabAdapter(
         val lineNumbers: TextView
     ) : RecyclerView.ViewHolder(view) {
         fun updateLineNumbers(tab: FileTab) {
-            // Определяем количество строк — минимально 1.
             val lines = editor.lineCount.coerceAtLeast(1)
             val builder = StringBuilder()
             for (i in 1..lines) {
                 if (tab.breakpoints.contains(i)) {
-                    builder.append("● ")  // Индикатор брейкпоинта
+                    builder.append("● ")  // Брекпоинт
                 } else {
                     builder.append("   ")
                 }
