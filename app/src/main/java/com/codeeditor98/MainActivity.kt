@@ -1,4 +1,5 @@
 package com.codeeditor98
+import android.util.Log
 
 import android.net.Uri
 import android.os.Bundle
