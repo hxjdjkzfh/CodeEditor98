@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -16,7 +15,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
+          distribution: "temurin"
           java-version: "17"
 
       - name: Grant execute permission for gradlew
@@ -24,12 +23,12 @@ jobs:
 
       - name: Build Debug APK
         id: build_apk
-        run: ./gradlew assembleDebug > build.log 2>&1 || true
+        run: |
+          ./gradlew assembleDebug > build.log 2>&1 || true
 
       - name: Notify Telegram on failure
         if: failure()
         run: |
-          # Ищем первую строку ошибки, содержащую "error:" или "Exception"
           ERR=$(grep -E '(/home/runner/work/[^:]+:[0-9]+: error: .+)' build.log | head -n 1)
           if [ -z "$ERR" ]; then
             ERR="No specific error found. Please check build.log manually."
@@ -45,16 +44,11 @@ jobs:
         run: |
           APK=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
           if [ -z "$APK" ]; then
-            echo "APK not found. Listing contents of app/build/outputs/apk:"
             DIAG=$(ls -la app/build/outputs/apk 2>&1)
             curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
               -d chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
               -d parse_mode="Markdown" \
-              --data-urlencode "text=✅ Build successful, but APK file not found.
-Detailed diagnostic:
-\`\`\`
-$DIAG
-\`\`\`"
+              --data-urlencode "text=✅ Build successful, but APK file not found.\nDetailed diagnostic:\n\`\`\`\n$DIAG\n\`\`\`"
           else
             curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
               -F chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
