@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,6 +26,21 @@ jobs:
         run: |
           ./gradlew assembleDebug > build.log 2>&1 || true
 
+      - name: Notify Telegram on failure
+        if: failure()
+        run: |
+          # Ищем первую строку, содержащую "error:" или "Exception"
+          ERR=\$(grep -E '(/home/runner/work/[^:]+:[0-9]+: error: .+)' build.log | head -n 1)
+          if [ -z "\$ERR" ]; then
+            ERR="No specific error found. Please check build.log manually."
+          fi
+          # Экранируем обратные кавычки для Markdown
+          CLEAN_ERR=\$(echo "\$ERR" | sed 's/`/\\`/g')
+          curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+            -d chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode=Markdown \
+            --data-urlencode "text=❌ Build failed:\n\`\`\`\n\$CLEAN_ERR\n\`\`\`"
+
       - name: Upload APK to Telegram on success
         if: success()
         run: |
@@ -41,13 +55,3 @@ jobs:
               -F document=@\$APK \
               -F caption="✅ Build successful: APK attached (\$APK)"
           fi
-
-      - name: Notify Telegram on failure
-        if: failure()
-        run: |
-          ERR=\$(grep -oP '(/home/runner/work/[^:]+:\d+: error: .+)' build.log | head -n 1)
-          if [ -z "\$ERR" ]; then ERR="No specific error found. Please check build.log manually."; fi
-          curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
-            -d chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode=Markdown \
-            --data-urlencode "text=❌ Build failed:\n\`\`\`\n\$ERR\n\`\`\`"
