@@ -1,52 +1,42 @@
-name: Build APK
+name: Android CI
 
 on:
   push:
-    paths:
-      - '**.kt'
-      - '**.xml'
-      - 'build.gradle'
-      - 'settings.gradle'
-      - '.github/workflows/build.yml'
-      - 'trigger.txt'
+    branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Setup JDK
-        uses: actions/setup-java@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: 17
+          distribution: temurin
 
-      - name: Check values-night-v8.xml presence
-        run: |
-          if ! [ -f app/src/main/res/values-night-v8/values-night-v8.xml ]; then
-            echo "values-night-v8.xml missing" > fail.txt
-            exit 1
-          fi
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-      - name: Grant execute permissions
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
+      - name: Build APK
         run: ./gradlew assembleDebug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: CodeEditor98.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Send error to Telegram
+      - name: Notify Telegram on failure
         if: failure()
         run: |
-          echo "Sending error to Telegram..."
-          LAST_ERROR=$(grep -A5 'A failure occurred while executing' < "${GITHUB_WORKSPACE}/app/build/reports/compile.txt" || true)
+          ERROR_LOG=$(find . -type f -name "*.log" -exec grep -Hn "error:" {} \; || true)
+          ERROR_TXT=$(echo "$ERROR_LOG" | sed "s/^[^:]*\///")
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d text="Build failed!\nFile: values-night-v8.xml\nError: expected reference but got raw string #222222"
+            -d text="⚠️ Build failed:\n\`\`\`\n$ERROR_TXT\n\`\`\`" \
+            -d parse_mode=Markdown
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: CodeEditor98-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
