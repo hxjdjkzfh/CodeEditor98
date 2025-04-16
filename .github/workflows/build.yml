@@ -41,7 +41,7 @@ jobs:
               if [ -z "$ERR_LINES" ]; then
                 ERR_LINES="Не найдено подробных сообщений об ошибках. Проверьте build.log вручную."
               fi
-              CLEAN_ERR=$(echo "$ERR_LINES" | sed 's/`/\\`/g')
+            ERR=$(grep -m1 -E "^e:|error:" build.log)
               curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
                 -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
                 -d parse_mode="Markdown" \
