@@ -17,39 +17,37 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
       - name: Build Debug APK
         id: build_apk
-        run: ./gradlew assembleDebug > build.log 2>&1 || true
-
-      - name: Notify Telegram on failure
-        if: failure()
         run: |
-          # Извлекаем последние 10 строк, содержащие "error:" (MarkdownV2 требует экранирования некоторых символов)
-          ERR=$(grep -E "error:" build.log | tail -n 10)
-          if [ -z "\$ERR" ]; then ERR="No detailed error found in build.log"; fi
-          # Экранируем обратные кавычки (```) — MarkdownV2
-          CLEAN_ERR=$(echo "\$ERR" | sed 's/`/\\`/g')
-          curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
-            -d chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode=MarkdownV2 \
-            --data-urlencode "text=❌ *Build failed:*\n\`\`\`\n\$CLEAN_ERR\n\`\`\`"
+          ./gradlew assembleDebug > build.log 2>&1 || true
 
       - name: Upload APK to Telegram on success
         if: success()
         run: |
-          APK="app/build/outputs/apk/debug/app-debug.apk"
-          if [ -f "\$APK" ]; then
-            curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
-              -F chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
-              -F document=@\$APK \
-              -F caption="✅ Build successful: APK attached"
-          else
+          APK=\$(find app/build/outputs/apk -name "*.apk" | head -n 1)
+          if [ -z "\$APK" ]; then
             curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
               -d chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
               -d text="✅ Build successful, but APK file not found."
+          else
+            curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
+              -F chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
+              -F document=@\$APK \
+              -F caption="✅ Build successful: APK attached (\$APK)"
           fi
+
+      - name: Notify Telegram on failure
+        if: failure()
+        run: |
+          ERR=\$(grep -oP '(/home/runner/work/[^:]+:\d+: error: .+)' build.log | head -n 1)
+          if [ -z "\$ERR" ]; then ERR="No specific error found. Please check build.log manually."; fi
+          curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+            -d chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d parse_mode=Markdown \
+            --data-urlencode "text=❌ Build failed:\n\`\`\`\n\$ERR\n\`\`\`"
