@@ -41,7 +41,7 @@ jobs:
           -F document=@app/build/outputs/apk/debug/app-debug.apk \
           -F caption="✅ CodeEditor98 build successful"
 
-    - name: Telegram: Notify failure
+    - name: "Telegram: Notify failure"
       if: failure()
       run: |
         ERR=$(tail -n 1000 $GITHUB_WORKSPACE/app/build/reports/*/*/*.txt 2>/dev/null | grep -E "error|Exception|FAILURE" | tail -n 20)
