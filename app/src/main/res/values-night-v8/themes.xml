@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.CodeEditor98" parent="Theme.Material3.DayNight.NoActionBar" />
+    <!-- Dummy fallback theme to satisfy the linker -->
+    <style name="Theme.Material3.DayNight.NoActionBar" parent="android:Theme.Material.Light.DarkActionBar" />
 </resources>
