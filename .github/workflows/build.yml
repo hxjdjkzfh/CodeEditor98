@@ -37,7 +37,7 @@ jobs:
                 "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
           else
               echo "APK не найден, отправляем сообщение об ошибке..."
-              ERR_LINES=$(grep -i 'error:' build.log | head -n 10)
+              ERR_LINES=$(grep -i -E 'error:|Error|Exception|FAIL' build.log | head -n 10)
               if [ -z "$ERR_LINES" ]; then
                 ERR_LINES="Не найдено подробных сообщений об ошибках. Проверьте build.log вручную."
               fi
