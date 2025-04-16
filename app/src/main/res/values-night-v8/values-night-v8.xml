@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Placeholder style to avoid AAPT2 error -->
-    <style name="NightThemePlaceholder" parent="android:Theme.DeviceDefault" />
+    <style name="AppTheme.Dark" parent="Theme.Material3.DayNight.NoActionBar" />
 </resources>
