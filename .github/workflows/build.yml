@@ -33,7 +33,7 @@ jobs:
         name: CodeEditor98-debug.apk
         path: app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Telegram: Notify success
+    - name: "Telegram: Notify success"
       if: success()
       run: |
         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument \
