@@ -23,7 +23,7 @@ jobs:
         rm -rf ~/.gradle/caches
         rm -rf ~/.android/build-cache
 
-    - name: Debug: values-night-v8.xml presence
+    - name: "Debug: values-night-v8.xml presence"
       run: |
         echo "---- [Debug] values-night-v8.xml ----"
         find $GITHUB_WORKSPACE -name values-night-v8.xml || echo "Not found"
