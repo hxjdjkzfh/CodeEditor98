@@ -1,42 +1,44 @@
-name: Build APK and notify
+name: CodeEditor98 CI with Safe Telegram Markdown
 
 on:
   push:
-    paths:
-      - '**.kt'
-      - '**.xml'
-      - '**.java'
-      - '**.gradle'
-      - 'trigger.txt'
-  workflow_dispatch:
+    branches:
+      - main
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
 
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
+      - name: Build and notify
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace --info > build.log 2>&1 || true
 
-    - name: Build debug APK and handle errors
-      run: |
-        ./gradlew assembleDebug > build.log 2>&1 || {
-          echo "❌ Error during build"
-          tail -n 200 build.log | grep -A 10 -B 10 -iE 'error|exception|failed' > error.txt || tail -n 100 build.log > error.txt
-          curl -F document=@error.txt -F chat_id=${{ secrets.TELEGRAM_TO }} -F caption="❌ Build failed" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
-          exit 1
-        }
-
-    - name: Send APK to Telegram
-      if: success()
-      run: |
-        curl -F document=@app/build/outputs/apk/debug/app-debug.apk -F chat_id=${{ secrets.TELEGRAM_TO }} -F caption="✅ APK built successfully" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
+          if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+            curl -F document=@app/build/outputs/apk/debug/app-debug.apk \
+                 -F chat_id="$TELEGRAM_CHAT_ID" \
+                 -F caption="✅ CodeEditor98 build succeeded" \
+                 "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendDocument"
+          else
+            echo "[DEBUG] Build failed, extracting error..."
+            ERRORS=$(grep -iE 'build.gradle.kts|Script compilation error|Unresolved reference|unexpected|FAILURE|> Task|Exception' build.log | tail -n 25 | sed -e 's/`/\\`/g' -e 's/(/\/g' -e 's/)/\/g' -e 's/\./\\./g' -e 's/\*/\\*/g' -e 's/-/\\-/g' -e 's/_/\\_/g' -e 's/>/\\>/g' -e 's/#/\\#/g')
+            TEXT="❌ *CodeEditor98 build failed*\n\`\`\`\n$ERRORS\n\`\`\`"
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
+              -d chat_id="$TELEGRAM_CHAT_ID" \
+              -d parse_mode=MarkdownV2 \
+              --data-urlencode "text=$TEXT"
+          fi
