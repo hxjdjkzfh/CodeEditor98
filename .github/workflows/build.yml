@@ -12,46 +12,37 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
       - name: Build Debug APK
         id: build_apk
-        run: ./gradlew assembleDebug > build.log 2>&1 || true
-
-      - name: Upload APK to Telegram (success)
-        if: success()
         run: |
-          APK="app/build/outputs/apk/debug/app-debug.apk"
-          if [ -f "$APK" ]; then
-            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
-              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-              -F document=@$APK \
-              -F caption="✅ Build successful: APK attached"
-          else
-            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
-              -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-              -d parse_mode=Markdown \
-              -d text="❌ Build successful but APK file not found."
-          fi
+          ./gradlew assembleDebug > build.log 2>&1 || true
 
-      - name: Notify Telegram on failure
+      - name: Parse build errors and send to Telegram
         if: failure()
         run: |
+          # Извлекаем первую строку ошибки, содержащую "error:" или "Exception"
           ERR=$(grep -oP '(/home/runner/work/[^:]+:\d+: error: .+)' build.log | head -n 1)
           if [ -z "$ERR" ]; then
             ERR="No specific error found. Please check build.log manually."
           fi
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
-            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d parse_mode=Markdown \
-            --data-urlencode "text=❌ Build failed:\n\`\`\`\n$ERR\n\`\`\`"
+            --data-urlencode "text=❌ *Build failed:*\n\`\`\`\n$ERR\n\`\`\`"
+
+      - name: Upload APK and notify Telegram on success
+        if: success()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument" \
+            -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -F document=@app/build/outputs/apk/debug/app-debug.apk \
+            -F caption="✅ Build successful: APK attached"
