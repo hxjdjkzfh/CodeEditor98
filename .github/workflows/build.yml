@@ -2,41 +2,42 @@ name: Android CI
 
 on:
   push:
-    branches: [ master ]
+    paths:
+      - '**.kt'
+      - '**.xml'
+      - '**.java'
+      - '**.gradle'
+      - 'trigger.txt'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: temurin
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: 17
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
 
-      - name: Build APK
-        run: ./gradlew assembleDebug
+    - name: Build Debug APK
+      id: build_apk
+      run: |
+        ./gradlew assembleDebug > build.log 2>&1 || {
+          echo "❌ Build failed, sending error to Telegram..."
+          tail -n 100 build.log | grep -A 10 -B 10 -iE 'error|exception|failed' > error.log || tail -n 100 build.log > error.log
+          curl -F document=@error.log -F chat_id=${{ secrets.TELEGRAM_TO }} -F caption="❌ Build failed — see error.log" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
+          exit 1
+        }
 
-      - name: Notify Telegram on failure
-        if: failure()
-        run: |
-          ERROR_LOG=$(find . -type f -name "*.log" -exec grep -Hn "error:" {} \; || true)
-          ERROR_TXT=$(echo "$ERROR_LOG" | sed "s/^[^:]*\///")
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
-            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d text="⚠️ Build failed:\n\`\`\`\n$ERROR_TXT\n\`\`\`" \
-            -d parse_mode=Markdown
-
-      - name: Upload APK
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: CodeEditor98-debug.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-
+    - name: Send APK to Telegram
+      if: success()
+      run: |
+        curl -F document=@app/build/outputs/apk/debug/app-debug.apk -F chat_id=${{ secrets.TELEGRAM_TO }} -F caption="✅ Build successful — APK attached" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
