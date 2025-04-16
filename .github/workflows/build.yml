@@ -22,43 +22,27 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build Debug APK
-        id: build_apk
         run: |
-          # Запускаем сборку и сохраняем вывод в build.log
-          ./gradlew assembleDebug > build.log 2>&1
-          # Определяем путь к APK (при необходимости скорректируйте путь для вашего проекта)
-          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
-          if [ ! -f "$APK_PATH" ]; then
-            echo "APK not found"
-            exit 1
-          fi
+          # Собираем проект и сохраняем лог сборки
+          ./gradlew assembleDebug > build.log 2>&1 || true
 
-      - name: Notify Telegram on failure
-        if: failure()
-        run: |
-          # Извлекаем строки с сообщениями об ошибках (ограничиваем вывод до 10 строк)
-          ERR_LINES=$(grep -i 'error:' build.log | head -n 10)
-          if [ -z "$ERR_LINES" ]; then
-            ERR_LINES="Не найдено подробных сообщений об ошибках. Проверьте build.log вручную."
-          fi
-          # Экранируем символы обратной кавычки для корректного форматирования Markdown
-          CLEAN_ERR=$(echo "$ERR_LINES" | sed 's/`/\\`/g')
-          # Отправляем уведомление в Telegram с сообщением об ошибке и её местоположении
-          curl -s -X POST "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
-            -d chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode="Markdown" \
-            --data-urlencode "text=❌ *Сборка не удалась!*\n\nОшибка:\n\`\`\`\n\$CLEAN_ERR\n\`\`\`"
-
-      - name: Notify Telegram on success
-        if: success()
+      - name: Notify Telegram with Build Result
         run: |
           APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
           if [ -f "$APK_PATH" ]; then
-            # Отправляем APK файл в Telegram с подписью
-            curl -s -F chat_id="\${{ secrets.TELEGRAM_CHAT_ID }}" \
-              -F document=@"\$APK_PATH" \
-              -F caption="✅ Сборка успешна! APK файл прилагается." \
-              "https://api.telegram.org/bot\${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
+              echo "APK найден, отправляем в Telegram..."
+              curl -s -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+                -F document=@"$APK_PATH" \
+                -F caption="✅ Сборка успешна! APK файл прилагается." \
+                "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
           else
-            echo "APK файл не найден для отправки."
-          fi
+              echo "APK не найден, отправляем сообщение об ошибке..."
+              ERR_LINES=$(grep -i 'error:' build.log | head -n 10)
+              if [ -z "$ERR_LINES" ]; then
+                ERR_LINES="Не найдено подробных сообщений об ошибках. Проверьте build.log вручную."
+              fi
+              CLEAN_ERR=$(echo "$ERR_LINES" | sed 's/`/\\`/g')
+              curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+                -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+                -d parse_mode="Markdown" \
+                --data-urlencode "text=❌ *Сборка не удалась!*\n\nОшибка:\n\`\`\`\n$CLEAN_ERR\n\`\`\`"
