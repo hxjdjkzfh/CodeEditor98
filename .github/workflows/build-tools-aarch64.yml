@@ -5,34 +5,46 @@ on:
   push:
 
 jobs:
-  build-tools:
+  build-aarch64-tools:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up dependencies
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up environment
         run: |
           sudo apt update
-          sudo apt install -y openjdk-17-jdk git curl unzip ninja-build python3 zlib1g-dev libc6-dev
+          sudo apt install -y zip unzip build-essential curl
 
-      - name: Clone AOSP build tools
+      - name: Clone Android Build Tools
         run: |
-          git clone https://android.googlesource.com/platform/build.git --depth=1
-          git clone https://android.googlesource.com/platform/frameworks/base.git --depth=1
-          git clone https://android.googlesource.com/platform/system/core.git --depth=1
-          git clone https://android.googlesource.com/platform/build/soong --depth=1
-          git clone https://android.googlesource.com/platform/prebuilts/build-tools --depth=1
+          git clone --depth=1 https://android.googlesource.com/platform/build tools && \
+          cd tools && \
+          ./gradlew :aapt2:assembleRelease
 
-      - name: Build AAPT2, zipalign, apksigner
+      - name: Find & zip aarch64 binaries
         run: |
-          mkdir -p bin
-          cd build
-          ./soong/bootstrap.bash
-          . build/envsetup.sh
-          lunch aosp_arm64-eng || true
-          make aapt2 zipalign apksigner -j$(nproc) || true
-          find out/host/linux-x86/bin -type f -exec cp {} ../bin/ \;
+          mkdir -p out
+          find tools -type f -name 'aapt2' -exec cp {} out/aapt2 \;
+          find tools -type f -name 'zipalign' -exec cp {} out/zipalign \;
+          find tools -type f -name 'apksigner' -exec cp {} out/apksigner \;
+          cd out && zip -r build-tools-aarch64.zip .
 
-      - name: Upload compiled tools
+      - name: Upload archive
         uses: actions/upload-artifact@v4
         with:
-          name: android-build-tools-aarch64
-          path: bin/
+          name: build-tools-aarch64
+          path: out/build-tools-aarch64.zip
+
+      - name: Print success message
+        run: echo "✅ Native aarch64 build tools compiled and uploaded."
+
+      - name: Telegram Notify (optional)
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ✅ Build tools for aarch64 ready.
+            Download: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
