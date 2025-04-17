@@ -1,4 +1,4 @@
-name: Build and Notify
+name: Build APK and Notify
 
 on:
   push:
@@ -7,47 +7,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: 'temurin'
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: 17
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
 
-      - name: Build APK
-        run: ./gradlew assembleDebug | tee build.log
+    - name: Build APK
+      run: ./gradlew assembleDebug | tee build.log
 
-      - name: Send APK to Telegram
-        if: success()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          document: app/build/outputs/apk/debug/app-debug.apk
-          message: |
-            ✅ CodeEditor98 APK build successful!
+    - name: Send APK to Telegram
+      if: success()
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        document: app/build/outputs/apk/debug/app-debug.apk
+        message: |
+          ✅ CodeEditor98 compiled successfully!
+          [GitHub Repo](${{ github.repositoryUrl }})
 
-      - name: Send build errors to Telegram
-        if: failure()
-        run: |
-          echo '❌ Build failed for CodeEditor98' > fail_message.txt
-          echo "🔹 Commit: ${{ github.event.head_commit.message }}" >> fail_message.txt
-          echo "🔹 Repo: ${{ github.repository }}" >> fail_message.txt
-          echo -e "\n--- BUILD LOG ---" >> fail_message.txt
-          tail -n 40 build.log >> fail_message.txt
-        shell: bash
+    - name: Send error log to Telegram
+      if: failure()
+      run: |
+        echo 'Build failed with these errors:' > build-error.txt
+        tail -n 100 build.log | grep -iE "error|exception|failed" >> build-error.txt
 
-      - name: Telegram error message
-        if: failure()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ steps.send-error.outputs.error }}
-          document: fail_message.txt
+    - name: Notify Telegram on Failure
+      if: failure()
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        document: build-error.txt
+        message: "❌ CodeEditor98 build failed — see errors"
