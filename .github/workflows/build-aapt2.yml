@@ -1,8 +1,7 @@
-name: Build AAPT2 for aarch64
+name: Build AAPT2 with CMake
 
 on:
   workflow_dispatch:
-  push:
 
 jobs:
   build-aapt2:
@@ -11,21 +10,21 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y git cmake ninja-build unzip openjdk-17-jdk
+          sudo apt install -y build-essential cmake ninja-build git openjdk-17-jdk
 
-      - name: Clone minimal AAPT2 fork with CMake
-        run: |
-          git clone --depth=1 https://github.com/raphw/aapt2.git aapt2-src
+      - name: Clone aapt2 repository
+        run: git clone https://github.com/hxjdjkzfh/aapt2.git aapt2-src
 
       - name: Build with CMake
         run: |
           cd aapt2-src
           mkdir -p build && cd build
           cmake .. -G Ninja
-          ninja
+          ninja || { echo "❌ Build failed"; exit 1; }
 
       - name: Upload built aapt2
         uses: actions/upload-artifact@v4
         with:
           name: aapt2-binary
-          path: aapt2-src/build/aapt2
+          path: |
+            aapt2-src/build/aapt2
