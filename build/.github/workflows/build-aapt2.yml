@@ -1,0 +1,28 @@
+name: Build AAPT2 with CMake
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-aapt2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential cmake ninja-build openjdk-17-jdk
+
+      - name: Configure and build with CMake
+        run: |
+          mkdir -p build && cd build
+          cmake ../cmake -G Ninja
+          ninja
+
+      - name: Upload built AAPT2 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: aapt2-binary
+          path: build/aapt2
