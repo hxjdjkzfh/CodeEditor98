@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout project
+    - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Set up JDK 17
@@ -24,17 +24,17 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
-    - name: Build APK
+    - name: Build release APK
       run: ./gradlew assembleRelease > build.log 2>&1
 
-    - name: Upload APK
+    - name: Upload APK artifact
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: CodeEditor98-APK
         path: app/build/outputs/apk/release/*.apk
 
-    - name: GitHub Release
+    - name: Create GitHub Release
       if: success()
       uses: softprops/action-gh-release@v2
       with:
@@ -42,24 +42,24 @@ jobs:
         name: CodeEditor98 Release #${{ github.run_number }}
         files: app/build/outputs/apk/release/*.apk
 
-    - name: Telegram Notify Success
+    - name: Telegram notification (success)
       if: success()
       run: |
         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
         -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-        -d text="✅ CodeEditor98 собран: https://github.com/${{ github.repository }}/releases/tag/v1.0.${{ github.run_number }}"
+        -d text="✅ CodeEditor98 has been successfully built:\nhttps://github.com/${{ github.repository }}/releases/tag/v1.0.${{ github.run_number }}"
 
-    - name: Upload Build Log
+    - name: Upload build log on failure
       if: failure()
       uses: actions/upload-artifact@v4
       with:
         name: build-log
         path: build.log
 
-    - name: Telegram Notify Failure
+    - name: Telegram notification (failure)
       if: failure()
       run: |
         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument \
         -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
         -F document=@build.log \
-        -F caption="❌ Ошибка сборки CodeEditor98:\nhttps://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        -F caption="❌ CodeEditor98 build failed:\nhttps://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
