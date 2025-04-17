@@ -19,7 +19,7 @@ jobs:
         run: |
           cd aapt2-src
           mkdir -p build && cd build
-          cmake .. -G Ninja
+          cmake ../cmake -G Ninja
           ninja || { echo "❌ Build failed"; exit 1; }
 
       - name: Upload compiled AAPT2 binary
