@@ -1,9 +1,9 @@
-<manifest package="com.example.codeeditor"
+<manifest
     xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:label="CodeEditor98"
         android:theme="@style/Theme.CodeEditor98.DarkRed">
-        <activity android:name=".EditorActivity">
+        <activity android:name=".EditorActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
