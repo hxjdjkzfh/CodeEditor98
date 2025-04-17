@@ -1,0 +1,38 @@
+name: Build Android Build Tools for aarch64
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y openjdk-17-jdk git curl unzip ninja-build python3 zlib1g-dev libc6-dev
+
+      - name: Clone AOSP build tools
+        run: |
+          git clone https://android.googlesource.com/platform/build.git --depth=1
+          git clone https://android.googlesource.com/platform/frameworks/base.git --depth=1
+          git clone https://android.googlesource.com/platform/system/core.git --depth=1
+          git clone https://android.googlesource.com/platform/build/soong --depth=1
+          git clone https://android.googlesource.com/platform/prebuilts/build-tools --depth=1
+
+      - name: Build AAPT2, zipalign, apksigner
+        run: |
+          mkdir -p bin
+          cd build
+          ./soong/bootstrap.bash
+          . build/envsetup.sh
+          lunch aosp_arm64-eng || true
+          make aapt2 zipalign apksigner -j$(nproc) || true
+          find out/host/linux-x86/bin -type f -exec cp {} ../bin/ \;
+
+      - name: Upload compiled tools
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-tools-aarch64
+          path: bin/
