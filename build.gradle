@@ -1,14 +1,9 @@
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.2'
     }
 }
 
-        google()
-        mavenCentral()
-    }
+allprojects {
+    // intentionally left blank — repositories declared in settings.gradle
 }
