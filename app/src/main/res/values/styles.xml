@@ -1,3 +1,11 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar" />
+    <style name="Theme.CodeEditor98.DarkRed" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/red</item>
+        <item name="colorPrimaryDark">@color/red</item>
+        <item name="colorAccent">@color/red</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:editTextBackground">@color/background</item>
+    </style>
 </resources>
