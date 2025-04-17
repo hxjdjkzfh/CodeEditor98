@@ -1,4 +1,4 @@
-name: Build AAPT2 with CMake
+name: Build AAPT2 with CMake from fork
 
 on:
   workflow_dispatch:
@@ -7,25 +7,28 @@ jobs:
   build-aapt2:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential cmake ninja-build openjdk-17-jdk
+          sudo apt install -y build-essential cmake ninja-build git openjdk-17-jdk
+
+      - name: Clone AAPT2 fork
+        run: |
+          git clone --depth=1 https://github.com/hxjdjkzfh/aapt2.git aapt2-src
 
       - name: Configure and build with CMake
+        working-directory: aapt2-src
         run: |
           mkdir -p build && cd build
           cmake ../cmake -G Ninja
           ninja
-          find . -type f -name aapt2 > ../aapt2-path.txt
+          find . -type f -name aapt2 > ../../aapt2-path.txt
 
       - name: Upload built AAPT2 binary
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: aapt2-binary
-          path: ${{ github.workspace }}/build/aapt2
+          path: |
+            aapt2-src/build/*/aapt2
           if-no-files-found: warn
