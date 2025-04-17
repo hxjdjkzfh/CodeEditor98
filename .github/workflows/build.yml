@@ -1,4 +1,4 @@
-name: Build APK and Send to Telegram
+name: Build AARCH64 Android APK
 
 on:
   push:
@@ -7,61 +7,56 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: 'temurin'
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: 17
 
-      - name: Grant permission to gradlew
-        run: chmod +x ./gradlew
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
 
-      - name: Build APK and save log
-        run: ./gradlew assembleDebug | tee build.log
+    - name: Build APK
+      run: ./gradlew assembleDebug > build.log 2>&1 || echo "BUILD_FAILED=true" >> $GITHUB_ENV
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+    - name: Upload APK
+      if: env.BUILD_FAILED != 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug.apk
+        path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload build log
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build.log
+    - name: Upload build log
+      uses: actions/upload-artifact@v4
+      with:
+        name: build.log
+        path: build.log
 
-      - name: Extract error for Telegram
-        if: failure()
-        run: |
-          echo '```' > short-error.txt
-          grep -E "e: file://|[0-9]+ actionable tasks|Execution failed for task" build.log | tail -n 20 >> short-error.txt
-          echo '```' >> short-error.txt
+    - name: Notify Telegram (Success)
+      if: env.BUILD_FAILED != 'true'
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        document: app/build/outputs/apk/debug/app-debug.apk
+        message: |
+          ✅ APK build success!
+          Commit: ${{ github.event.head_commit.message }}
+          Repo: ${{ github.repository }}
 
-      - name: Send success message
-        if: success()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            ✅ CodeEditor98 compiled successfully!
-            APK: available in artifacts
-
-      - name: Send failure message
-        if: failure()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            ❌ Build failed!
-            Commit: ${{ github.event.head_commit.message }}
-
-            Last lines:
-            $(cat short-error.txt)
+    - name: Notify Telegram (Failure)
+      if: env.BUILD_FAILED == 'true'
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        document: build.log
+        message: |
+          ❌ APK build failed!
+          Commit: ${{ github.event.head_commit.message }}
+          Repo: ${{ github.repository }}
+          Log file attached for details.
