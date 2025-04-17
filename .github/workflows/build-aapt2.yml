@@ -1,8 +1,8 @@
 name: Build AAPT2 for aarch64
 
 on:
-  push:
   workflow_dispatch:
+  push:
 
 jobs:
   build-aapt2:
@@ -11,17 +11,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y git ninja-build cmake unzip curl
+          sudo apt install -y git cmake ninja-build unzip openjdk-17-jdk
 
-      - name: Clone AAPT2 using PAT
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+      - name: Clone AAPT2 from AOSP
         run: |
-          git clone --depth=1 https://hxjdjkzfh:${GH_PAT}@github.com/google/aapt2.git aapt2-src
+          git clone --depth=1 https://android.googlesource.com/platform/frameworks/base base-src
 
-      - name: Build AAPT2
+      - name: Prepare CMake build
         run: |
-          cd aapt2-src
+          cd base-src/tools/aapt2
           mkdir -p build && cd build
           cmake .. -G Ninja
           ninja
@@ -30,5 +28,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aapt2-binary
-          path: |
-            aapt2-src/build/*/aapt2
+          path: base-src/tools/aapt2/build/*/aapt2
