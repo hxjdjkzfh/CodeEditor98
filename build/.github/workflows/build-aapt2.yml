@@ -20,9 +20,12 @@ jobs:
           mkdir -p build && cd build
           cmake ../cmake -G Ninja
           ninja
+          find . -type f -name aapt2 > ../aapt2-path.txt
 
       - name: Upload built AAPT2 binary
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: aapt2-binary
-          path: build/aapt2
+          path: ${{ github.workspace }}/build/aapt2
+          if-no-files-found: warn
