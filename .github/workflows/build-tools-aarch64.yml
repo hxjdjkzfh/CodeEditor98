@@ -14,20 +14,30 @@ jobs:
       - name: Set up environment
         run: |
           sudo apt update
-          sudo apt install -y zip unzip build-essential curl
+          sudo apt install -y zip unzip build-essential curl git
 
       - name: Clone Android Build Tools
         run: |
-          git clone --depth=1 https://android.googlesource.com/platform/build tools && \
-          cd tools && \
+          git clone --depth=1 https://android.googlesource.com/platform/build build-tools-src
+
+      - name: Build aapt2
+        run: |
+          cd build-tools-src
+          chmod +x gradlew || true
+          GRADLEW_PATH="$(find . -name gradlew | head -n1)"
+          if [[ -z "$GRADLEW_PATH" ]]; then
+            echo "❌ gradlew not found!" && exit 1
+          fi
+          echo "✅ Found gradlew at: $GRADLEW_PATH"
+          cd "$(dirname "$GRADLEW_PATH")"
           ./gradlew :aapt2:assembleRelease
 
       - name: Find & zip aarch64 binaries
         run: |
           mkdir -p out
-          find tools -type f -name 'aapt2' -exec cp {} out/aapt2 \;
-          find tools -type f -name 'zipalign' -exec cp {} out/zipalign \;
-          find tools -type f -name 'apksigner' -exec cp {} out/apksigner \;
+          find build-tools-src -type f -name 'aapt2' -exec cp {} out/aapt2 \;
+          find build-tools-src -type f -name 'zipalign' -exec cp {} out/zipalign \;
+          find build-tools-src -type f -name 'apksigner' -exec cp {} out/apksigner \;
           cd out && zip -r build-tools-aarch64.zip .
 
       - name: Upload archive
@@ -36,15 +46,12 @@ jobs:
           name: build-tools-aarch64
           path: out/build-tools-aarch64.zip
 
-      - name: Print success message
-        run: echo "✅ Native aarch64 build tools compiled and uploaded."
-
-      - name: Telegram Notify (optional)
+      - name: Notify Telegram
         if: success()
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ✅ Build tools for aarch64 ready.
-            Download: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            ✅ Build tools for aarch64 compiled and archived:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
