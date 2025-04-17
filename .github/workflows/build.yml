@@ -7,10 +7,32 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: /opt/android-sdk
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Cache Gradle
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
+
+    - name: Cache Android SDK
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.android
+          ${{ env.ANDROID_SDK_ROOT }}
+        key: sdk-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          sdk-${{ runner.os }}-
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -49,7 +71,7 @@ jobs:
         -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
         -d text="✅ CodeEditor98 has been successfully built:\nhttps://github.com/${{ github.repository }}/releases/tag/v1.0.${{ github.run_number }}"
 
-    - name: Upload build log on failure
+    - name: Upload build log (failure)
       if: failure()
       uses: actions/upload-artifact@v4
       with:
