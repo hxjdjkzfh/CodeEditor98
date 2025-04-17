@@ -54,3 +54,14 @@ jobs:
           message: |
             ❌ Build failed for CodeEditor98
             Commit: ${{ github.event.head_commit.message }}
+      - name: Send error log to Telegram on failure
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          document: build.log
+          message: |
+            ❌ Build failed for CodeEditor98
+            Commit: ${{ github.event.head_commit.message }}
+            Repo: ${{ github.repository }}
