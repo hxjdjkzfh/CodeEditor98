@@ -18,32 +18,28 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Grant execute permission for gradlew
+      - name: Make Gradle executable
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
+      - name: Build and notify Telegram
         run: |
-          # Собираем проект и сохраняем лог сборки
-          ./gradlew assembleDebug > build.log 2>&1 || true
+          # Собираем и сохраняем лог в память
+          ./gradlew clean assembleDebug > build.log 2>&1
 
-      - name: Notify Telegram with Build Result
-        run: |
-          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
-          if [ -f "$APK_PATH" ]; then
-              echo "APK найден, отправляем в Telegram..."
-              curl -s -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-                -F document=@"$APK_PATH" \
-                -F caption="✅ Сборка успешна! APK файл прилагается." \
-                "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [ -f "$APK" ]; then
+            # Успешно собралось — отправляем APK
+            curl -s -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+              -F document=@"$APK" \
+              -F caption="✅ Сборка успешна! APK готов." \
+              "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument"
           else
-              echo "APK не найден, отправляем сообщение об ошибке..."
-              ERR_LINES=$(grep -i -E 'error:|Error|Exception|FAIL' build.log | head -n 10)
-              if [ -z "$ERR_LINES" ]; then
-                ERR_LINES="Не найдено подробных сообщений об ошибках. Проверьте build.log вручную."
-              fi
+            # Сборка упала — отправляем первую строку ошибки
             ERR=$(grep -m1 -E "^e:|error:" build.log)
-              curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
-                -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-                -d parse_mode="Markdown" \
-                --data-urlencode "text=❌ *Сборка не удалась!*\n\nОшибка:\n\`\`\`\n$CLEAN_ERR\n\`\`\`"
+            [ -z "$ERR" ] && ERR="Неизвестная ошибка. Смотрите build.log."
+            ESC_ERR=$(echo "$ERR" | sed 's/`/\\`/g')
+            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
+              -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+              -d parse_mode="Markdown" \
+              --data-urlencode "text=❌ *Сборка не удалась!*\n\`\`\`\n\$ESC_ERR\n\`\`\`"
           fi
