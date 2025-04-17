@@ -1,4 +1,4 @@
-name: Build APK and Notify
+name: Build APK and Send to Telegram
 
 on:
   push:
@@ -9,42 +9,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
 
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
+      - name: Grant permission to gradlew
+        run: chmod +x ./gradlew
 
-    - name: Build APK
-      run: ./gradlew assembleDebug | tee build.log
+      - name: Build APK and save log
+        run: ./gradlew assembleDebug | tee build.log
 
-    - name: Send APK to Telegram
-      if: success()
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_TO }}
-        token: ${{ secrets.TELEGRAM_TOKEN }}
-        document: app/build/outputs/apk/debug/app-debug.apk
-        message: |
-          ✅ CodeEditor98 compiled successfully!
-          [GitHub Repo](${{ github.repositoryUrl }})
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Send error log to Telegram
-      if: failure()
-      run: |
-        echo 'Build failed with these errors:' > build-error.txt
-        tail -n 100 build.log | grep -iE "error|exception|failed" >> build-error.txt
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
 
-    - name: Notify Telegram on Failure
-      if: failure()
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_TO }}
-        token: ${{ secrets.TELEGRAM_TOKEN }}
-        document: build-error.txt
-        message: "❌ CodeEditor98 build failed — see errors"
+      - name: Extract error for Telegram
+        if: failure()
+        run: |
+          echo '```' > short-error.txt
+          grep -E "e: file://|[0-9]+ actionable tasks|Execution failed for task" build.log | tail -n 20 >> short-error.txt
+          echo '```' >> short-error.txt
+
+      - name: Send success message
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ✅ CodeEditor98 compiled successfully!
+            APK: available in artifacts
+
+      - name: Send failure message
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ❌ Build failed!
+            Commit: ${{ github.event.head_commit.message }}
+
+            Last lines:
+            $(cat short-error.txt)
