@@ -3,6 +3,8 @@ plugins {
 }
 
 android {
+    namespace "com.example.codeeditor"
+    namespace "com.example.codeeditor"
     compileSdk 34
     defaultConfig {
         applicationId "com.example.codeeditor"
